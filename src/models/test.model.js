@@ -17,7 +17,6 @@ const testSchema = new Schema(
     },
     testScore: {
       type: Number,
-      required: true,
       min: 0,
       max: 10,
     },
