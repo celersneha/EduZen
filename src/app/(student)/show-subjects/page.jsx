@@ -24,13 +24,14 @@ export default function ShowSubjects() {
     const fetchSubjects = async () => {
       try {
         const loadingToast = toast.loading("Loading your subjects...");
-        const response = await fetch("/api/subjects/show-subjects");
+        const response = await fetch("/api/show-syllabuses");
         toast.dismiss(loadingToast);
 
         if (!response.ok) {
           throw new Error("Failed to fetch subjects");
         }
         const data = await response.json();
+        console.log("Fetched subjects:", data);
         setSubjects(data.subjects || []);
         setLoading(false);
       } catch (error) {
@@ -88,7 +89,7 @@ export default function ShowSubjects() {
               onClick={() => handleSubjectClick(subject._id)}
             >
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">{subject.name}</CardTitle>
+                <CardTitle className="text-lg">{subject.subjectName}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
