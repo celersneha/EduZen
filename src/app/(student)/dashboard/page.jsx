@@ -9,13 +9,12 @@ import {
   PieChart,
   LineChart,
   BookOpen,
-  Clock,
   Target,
   Brain,
   Award,
   TrendingUp,
   CheckCircle,
-  AlertCircle,
+  FileText,
 } from "lucide-react";
 import {
   BarChart as RechartsBarChart,
@@ -47,13 +46,22 @@ export default function StudentDashboard() {
   const { data: session } = useSession();
 
   // Chart configurations
-  const studyTimeConfig = {
-    hours: { label: "Study Hours", color: "hsl(var(--chart-1))" },
+  const difficultyConfig = {
+    Easy: { label: "Easy", color: "#22C55E" },
+    Medium: { label: "Medium", color: "#EAB308" },
+    Hard: { label: "Hard", color: "#EF4444" },
   };
 
   const contentMasteryConfig = {
-    "Syllabus Added": { label: "Syllabus Added", color: "#22C55E" },
-    "Ready to Study": { label: "Ready to Study", color: "#EAB308" },
+    "High Performance": { label: "High Performance (80%+)", color: "#22C55E" },
+    "Medium Performance": {
+      label: "Medium Performance (60-79%)",
+      color: "#EAB308",
+    },
+    "Needs Improvement": {
+      label: "Needs Improvement (<60%)",
+      color: "#EF4444",
+    },
   };
 
   useEffect(() => {
@@ -124,15 +132,28 @@ export default function StudentDashboard() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            Student Learning Dashboard
+            Student Performance Dashboard
           </h1>
           <p className="text-gray-600 text-lg">
-            Track your syllabus content and study preparation
+            Track your test performance and academic progress
           </p>
+          {insights.recentPerformanceTrend && (
+            <div
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-2 ${
+                insights.recentPerformanceTrend === "Improving"
+                  ? "bg-green-100 text-green-800"
+                  : insights.recentPerformanceTrend === "Declining"
+                  ? "bg-red-100 text-red-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              Recent Trend: {insights.recentPerformanceTrend}
+            </div>
+          )}
         </motion.div>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           {[
             {
               title: "Total Subjects",
@@ -153,18 +174,26 @@ export default function StudentDashboard() {
             {
               title: "Total Topics",
               value: keyMetrics.totalTopics,
-              desc: "Ready to study",
+              desc: "Available to study",
               Icon: Brain,
               color: "bg-purple-500",
               trend: "Available",
             },
             {
-              title: "Study Hours",
-              value: keyMetrics.estimatedStudyHours,
-              desc: "Estimated total",
-              Icon: Clock,
+              title: "Tests Taken",
+              value: keyMetrics.totalTests,
+              desc: "Completed assessments",
+              Icon: FileText,
+              color: "bg-orange-500",
+              trend: "Completed",
+            },
+            {
+              title: "Average Score",
+              value: keyMetrics.averageScore,
+              desc: "Overall performance",
+              Icon: Award,
               color: "bg-yellow-500",
-              trend: "Estimated",
+              trend: "Performance",
             },
           ].map((metric, index) => (
             <motion.div
@@ -194,9 +223,9 @@ export default function StudentDashboard() {
           ))}
         </div>
 
-        {/* Charts Section */}
+        {/* Enhanced Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Subject Content Analysis */}
+          {/* Subject Performance Analysis - Enhanced */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -204,7 +233,7 @@ export default function StudentDashboard() {
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900">
-                Subject Content Analysis
+                Subject Test Performance
               </h3>
               <BarChart className="w-5 h-5 text-blue-500" />
             </div>
@@ -220,17 +249,21 @@ export default function StudentDashboard() {
                       border: "1px solid #e0e0e0",
                       borderRadius: "8px",
                     }}
+                    formatter={(value, name) => [
+                      name === "avgScore" ? `${value}%` : value,
+                      name === "avgScore" ? "Average Score" : "Tests Taken",
+                    ]}
                   />
                   <Bar
-                    dataKey="chaptersCount"
+                    dataKey="avgScore"
                     fill="#3B82F6"
-                    name="Chapters"
+                    name="Average Score %"
                     radius={[2, 2, 0, 0]}
                   />
                   <Bar
-                    dataKey="topicsCount"
+                    dataKey="testsAttempted"
                     fill="#10B981"
-                    name="Topics"
+                    name="Tests Taken"
                     radius={[2, 2, 0, 0]}
                   />
                 </RechartsBarChart>
@@ -238,7 +271,7 @@ export default function StudentDashboard() {
             </div>
           </motion.div>
 
-          {/* Study Time Distribution */}
+          {/* Test Difficulty Distribution */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -246,30 +279,36 @@ export default function StudentDashboard() {
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900">
-                Estimated Study Hours
+                Test Difficulty Distribution
               </h3>
               <PieChart className="w-5 h-5 text-green-500" />
             </div>
             <div className="h-64 flex items-center">
               <ChartContainer
-                config={studyTimeConfig}
+                config={difficultyConfig}
                 className="w-full aspect-square max-h-[250px]"
               >
                 <RechartsPieChart>
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Pie
-                    data={chartData.studyTimeData}
-                    dataKey="hours"
-                    nameKey="subject"
+                    data={chartData.difficultyData}
+                    dataKey="count"
+                    nameKey="difficulty"
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
                     fill="#8884d8"
                   >
-                    {chartData.studyTimeData.map((entry, index) => (
+                    {chartData.difficultyData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={`hsl(${index * 72}, 70%, 50%)`}
+                        fill={
+                          entry.difficulty === "Easy"
+                            ? "#22C55E"
+                            : entry.difficulty === "Medium"
+                            ? "#EAB308"
+                            : "#EF4444"
+                        }
                       />
                     ))}
                   </Pie>
@@ -277,12 +316,28 @@ export default function StudentDashboard() {
                 </RechartsPieChart>
               </ChartContainer>
             </div>
+            {/* Additional stats below the chart */}
+            <div className="mt-4 grid grid-cols-3 gap-4">
+              {chartData.difficultyData.map((item, index) => (
+                <div key={index} className="text-center">
+                  <div className="text-lg font-bold text-gray-900">
+                    {item.count}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {item.difficulty} Tests
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {item.avgScore}% Avg
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
         </div>
 
-        {/* Content Overview */}
+        {/* Progress and Performance */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Content Readiness */}
+          {/* Score Progress Over Time - Enhanced */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -290,7 +345,72 @@ export default function StudentDashboard() {
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900">
-                Study Readiness
+                Score Progression
+              </h3>
+              <LineChart className="w-5 h-5 text-purple-500" />
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsLineChart data={chartData.scoreProgressData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis
+                    dataKey="testNumber"
+                    stroke="#666"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    stroke="#666"
+                    tick={{ fontSize: 12 }}
+                    domain={[0, 100]}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "white",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "8px",
+                    }}
+                    formatter={(value, name) => [`${value}%`, "Score"]}
+                    labelFormatter={(label) => `Test ${label}`}
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+                            <p className="font-medium">{`Test ${label}`}</p>
+                            <p className="text-blue-600">{`Score: ${payload[0].value}%`}</p>
+                            <p className="text-gray-600 text-sm">{`Subject: ${data.subject}`}</p>
+                            <p className="text-gray-600 text-sm">{`Chapter: ${data.chapter}`}</p>
+                            {data.topic && (
+                              <p className="text-gray-600 text-sm">{`Topic: ${data.topic}`}</p>
+                            )}
+                            <p className="text-gray-500 text-xs">{data.date}</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#8B5CF6"
+                    strokeWidth={3}
+                    dot={{ fill: "#8B5CF6", r: 4 }}
+                  />
+                </RechartsLineChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+
+          {/* Performance Distribution */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">
+                Performance Distribution
               </h3>
               <Brain className="w-5 h-5 text-green-500" />
             </div>
@@ -312,6 +432,11 @@ export default function StudentDashboard() {
                     <Label
                       content={({ viewBox }) => {
                         if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                          const totalTests =
+                            chartData.contentMasteryData.reduce(
+                              (sum, item) => sum + item.value,
+                              0
+                            );
                           return (
                             <text
                               x={viewBox.cx}
@@ -324,14 +449,14 @@ export default function StudentDashboard() {
                                 y={viewBox.cy}
                                 className="text-3xl font-bold fill-gray-900"
                               >
-                                {keyMetrics.totalTopics}
+                                {totalTests}
                               </tspan>
                               <tspan
                                 x={viewBox.cx}
                                 y={(viewBox.cy || 0) + 24}
                                 className="fill-gray-500 text-sm"
                               >
-                                Topics
+                                Total Tests
                               </tspan>
                             </text>
                           );
@@ -343,54 +468,11 @@ export default function StudentDashboard() {
               </ChartContainer>
             </div>
           </motion.div>
-
-          {/* Growth Tracking */}
-          {chartData.growthData.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">
-                  Content Growth
-                </h3>
-                <LineChart className="w-5 h-5 text-purple-500" />
-              </div>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsLineChart data={chartData.growthData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis
-                      dataKey="month"
-                      stroke="#666"
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis stroke="#666" tick={{ fontSize: 12 }} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "white",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="cumulativeTopics"
-                      stroke="#8B5CF6"
-                      strokeWidth={3}
-                      dot={{ fill: "#8B5CF6", r: 4 }}
-                    />
-                  </RechartsLineChart>
-                </ResponsiveContainer>
-              </div>
-            </motion.div>
-          )}
         </div>
 
-        {/* Insights Section */}
+        {/* Enhanced Insights Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Study Insights */}
+          {/* Test Analytics - Enhanced */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -399,38 +481,46 @@ export default function StudentDashboard() {
             <div className="flex items-center space-x-2 mb-6">
               <TrendingUp className="h-6 w-6 text-blue-500" />
               <h3 className="text-xl font-bold text-gray-900">
-                Study Insights
+                Performance Analytics
               </h3>
             </div>
             <div className="space-y-4">
               <div className="p-4 bg-blue-50 rounded-lg">
                 <h4 className="font-medium text-blue-900 mb-1">
-                  Content Rich Subject
+                  Best Performing Subject
                 </h4>
                 <p className="text-sm text-blue-700">
-                  {insights.mostContentRichSubject}
+                  {insights.bestPerformingSubject}
+                </p>
+              </div>
+              <div className="p-4 bg-yellow-50 rounded-lg">
+                <h4 className="font-medium text-yellow-900 mb-1">
+                  Needs Attention
+                </h4>
+                <p className="text-sm text-yellow-700">
+                  {insights.weakestSubject}
                 </p>
               </div>
               <div className="p-4 bg-green-50 rounded-lg">
                 <h4 className="font-medium text-green-900 mb-1">
-                  Average Topics per Subject
+                  Preferred Difficulty
                 </h4>
                 <p className="text-sm text-green-700">
-                  {insights.averageTopicsPerSubject} topics
+                  {insights.difficultyPreference} level tests
                 </p>
               </div>
               <div className="p-4 bg-purple-50 rounded-lg">
                 <h4 className="font-medium text-purple-900 mb-1">
-                  Total Content Items
+                  Most Active Subject
                 </h4>
                 <p className="text-sm text-purple-700">
-                  {insights.totalContentItems} items to study
+                  {insights.mostTestedSubject}
                 </p>
               </div>
             </div>
           </motion.div>
 
-          {/* Study Recommendations */}
+          {/* Performance Summary - Enhanced */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -438,15 +528,17 @@ export default function StudentDashboard() {
           >
             <div className="flex items-center space-x-2 mb-6">
               <Award className="h-6 w-6 text-purple-500" />
-              <h3 className="text-xl font-bold text-gray-900">Study Status</h3>
+              <h3 className="text-xl font-bold text-gray-900">
+                Performance Summary
+              </h3>
             </div>
             <div className="space-y-4">
               <div className="flex items-start space-x-3 p-4 bg-green-50 rounded-lg">
                 <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-green-900">Ready to Learn</h4>
+                  <h4 className="font-medium text-green-900">Test Progress</h4>
                   <p className="text-sm text-green-700">
-                    {insights.studyReadiness}
+                    {insights.testReadiness}
                   </p>
                 </div>
               </div>
@@ -464,14 +556,14 @@ export default function StudentDashboard() {
                 </div>
               </div>
               <div className="flex items-start space-x-3 p-4 bg-yellow-50 rounded-lg">
-                <Clock className="h-5 w-5 text-yellow-500 mt-0.5" />
+                <FileText className="h-5 w-5 text-yellow-500 mt-0.5" />
                 <div>
                   <h4 className="font-medium text-yellow-900">
-                    Time Investment
+                    Assessment Status
                   </h4>
                   <p className="text-sm text-yellow-700">
-                    Estimated {keyMetrics.estimatedStudyHours} of study time
-                    required.
+                    {keyMetrics.totalTests} tests completed with{" "}
+                    {keyMetrics.averageScore} average score.
                   </p>
                 </div>
               </div>
