@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle, ArrowRight, UserPlus } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -83,129 +83,233 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Create an account
-          </CardTitle>
-          <CardDescription className="text-center">
-            Enter your details to register for EduZen
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {message.content && (
-            <Alert className={`mb-4 ${message.type === "error" ? "border-red-500" : "border-green-500"}`}>
-              <AlertDescription className={message.type === "error" ? "text-red-700" : "text-green-700"}>
-                {message.content}
-              </AlertDescription>
-            </Alert>
-          )}
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background with gradients and animations */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-white"></div>
+      <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-200 rounded-full filter blur-3xl opacity-30 animate-blob"></div>
+      <div className="absolute top-40 -left-24 w-96 h-96 bg-blue-200 rounded-full filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+      
+      <div className="relative z-10 flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md">
+          {/* Logo/Brand */}
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-block">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl p-3 mb-4">
+                <span className="text-2xl">EduZen</span>
+              </div>
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h1>
+            <p className="text-gray-600">Join thousands of students transforming their learning</p>
+          </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your full name"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <Card className="backdrop-blur-sm bg-white/80 border border-white/20 shadow-xl rounded-2xl">
+            <CardHeader className="text-center pb-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserPlus className="h-8 w-8 text-blue-600" />
+              </div>
+              <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+                Get Started Free
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Start your AI-powered learning journey today
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="space-y-6">
+              {message.content && (
+                <Alert className={`border-l-4 ${
+                  message.type === "error" 
+                    ? "border-l-red-500 bg-red-50" 
+                    : "border-l-green-500 bg-green-50"
+                }`}>
+                  {message.type === "success" && (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  )}
+                  <AlertDescription className={
+                    message.type === "error" ? "text-red-700" : "text-green-700"
+                  }>
+                    {message.content}
+                  </AlertDescription>
+                </Alert>
+              )}
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Enter your email"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700">Full Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter your full name"
+                            {...field}
+                            disabled={isLoading}
+                            className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-500 text-xs" />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Choose a username"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700">Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="Enter your email"
+                            {...field}
+                            disabled={isLoading}
+                            className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-500 text-xs" />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Create a password"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700">Username</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Choose a username"
+                            {...field}
+                            disabled={isLoading}
+                            className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-500 text-xs" />
+                      </FormItem>
+                    )}
+                  />
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  "Create account"
-                )}
-              </Button>
-            </form>
-          </Form>
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700">Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="Create a password"
+                            {...field}
+                            disabled={isLoading}
+                            className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-500 text-xs" />
+                      </FormItem>
+                    )}
+                  />
 
-          <div className="mt-6 text-center text-sm">
-            Already have an account?{" "}
-            <Link
-              href="/sign-in"
-              className="font-medium text-primary hover:underline"
+                  <Button
+                    type="submit"
+                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      <>
+                        Create account
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </Form>
+
+              {/* Features list */}
+              <div className="pt-4 border-t border-gray-100">
+                <p className="text-xs text-gray-500 mb-3 text-center">What you'll get:</p>
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                    <span>AI-powered test generation</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                    <span>Smart syllabus management</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                    <span>Performance analytics</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center pt-4 border-t border-gray-100">
+                <p className="text-sm text-gray-600">
+                  Already have an account?{" "}
+                  <Link
+                    href="/login"
+                    className="font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    Sign in here
+                  </Link>
+                </p>
+              </div>
+
+              <div className="text-center">
+                <p className="text-xs text-gray-500">
+                  By creating an account, you agree to our{" "}
+                  <Link href="#" className="text-blue-600 hover:underline">Terms of Service</Link>
+                  {" "}and{" "}
+                  <Link href="#" className="text-blue-600 hover:underline">Privacy Policy</Link>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Back to home link */}
+          <div className="text-center mt-6">
+            <Link 
+              href="/" 
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center"
             >
-              Sign in
+              ← Back to home
             </Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      {/* Add animations */}
+      <style jsx>{`
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        @keyframes blob {
+          0% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          33% {
+            transform: translate(30px, -50px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }
