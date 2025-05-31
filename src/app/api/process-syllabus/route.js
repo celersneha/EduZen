@@ -35,7 +35,7 @@ export async function POST(req) {
       );
     }
 
-    const student = user._id;
+    const student = user.id;
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -111,7 +111,9 @@ Important rules:
     }));
 
     // Add the user-provided subject name
-    syllabusData.syllabusSubject = subjectName;
+    syllabusData.subjectName = subjectName;
+
+    console.log("Syllabus data processed:", syllabusData);
 
     // Create subject document
     const subject = new SubjectModel(syllabusData);
