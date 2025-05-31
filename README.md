@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📘 EduZen
 
-## Getting Started
+**EduZen** is an intelligent and personalized education platform for students. It leverages AI to simplify test preparation, syllabus management, and performance analysis — all in one seamless experience.
 
-First, run the development server:
+## 🚀 Features
+
+### 🔐 Authentication
+- Secure login system using **NextAuth.js**
+- Individual student profiles with subject and test data
+
+### 📚 Smart Subject Management
+- Add and manage custom subjects
+- Upload curriculum PDFs
+- **AI-powered (Gemini)** PDF parser extracts syllabus chapters and topics automatically
+
+### 🧪 AI Test Generation
+- Take tests at **subject**, **chapter**, or **topic** level
+- Choose test difficulty: Easy, Medium, or Hard
+- All questions are generated dynamically using **AI models**
+
+### 📊 Intelligent Performance Analytics
+- Detailed result breakdown for each test
+- View explanations for every question
+- Subject dashboards include:
+  - Test history
+  - Progress tracking
+  - AI-powered insights and predictions
+
+---
+
+## 🛠️ Tech Stack
+
+| Tech            | Description                         |
+|-----------------|-------------------------------------|
+| **Next.js 15**  | App Router architecture             |
+| **NextAuth.js** | Authentication and session handling |
+| **MongoDB**     | NoSQL database for user data        |
+| **Tailwind CSS**| Utility-first styling               |
+| **JavaScript**  | Core language for logic & UI        |
+
+---
+
+## 🧠 AI Integration
+
+- Uses **Gemini AI** for curriculum PDF parsing and test generation
+- AI generates questions, explanations, insights, and progress predictions
+
+---
+
+## 🧪 Local Development
 
 ```bash
+# Clone the repo
+git clone https://github.com/AI-for-Impact-Group-2/ai-for-impact-final-day-duosyntax.git
+
+# Go into the project
+cd eduzen
+
+# Install dependencies
+npm install
+
+# Create .env file and add required keys for:
+# - MongoDB URI
+# - NextAuth Secrets
+# - Gemini AI Keys
+
+# Run the app
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+````
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🌟 Future Enhancements
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* Flashcards and spaced repetition system
+* Study planner with AI-generated schedules
+* Peer leaderboard and competition mode
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## ✨ Authors
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Made with 💡 by the **DuoSyntax** Team
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
