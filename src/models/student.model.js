@@ -30,10 +30,10 @@ const studentSchema = new Schema(
       type: Date,
       required: true,
     },
-    syllabuses: [
+    subjects: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Syllabus",
+        ref: "Subject",
       },
     ],
   },
