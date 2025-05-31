@@ -318,7 +318,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="md:w-1/2">
               <Image
-                src="/mockup-placeholder.png"
+                src="/dashboard.jpg"
                 width={600}
                 height={400}
                 alt="EduZen dashboard mockup"
