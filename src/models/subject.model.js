@@ -30,7 +30,7 @@ const subjectSchema = new mongoose.Schema(
   }
 );
 
-const Subject =
+const SubjectModel =
   mongoose.models.Subject || mongoose.model("Subject", subjectSchema);
 
-export default Subject;
+export default SubjectModel;
