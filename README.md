@@ -202,21 +202,27 @@ npm run dev
 5. **Open your browser**
 Navigate to `http://localhost:3000`
 
-<!-- ---
+---
 
 ## 📱 **Screenshots & Demo**
-
-### 🏠 **Landing Page**
-Beautiful, modern design that showcases AI capabilities
 
 ### 📚 **Subject Dashboard**
 Clean interface showing all your subjects with AI-extracted content
 
+![Screenshot](public/listsubjects.png)
+
+![Screenshot](public/subject.png)
+
+![Screenshot](public/upload-subject.png)
+
+
+
 ### 🧪 **AI Test Interface**
 Intuitive test-taking experience with real-time AI feedback
 
-### 📊 **Analytics Dashboard**
-Comprehensive performance insights powered by AI -->
+![Screenshot](public/Ai-test.png)
+
+![Screenshot](public/test-attempt.png)
 
 ---
 
