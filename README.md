@@ -1,5 +1,7 @@
 # 📚 EduZen: AI-Powered Learning Companion
 
+## **DEMO VIDEO**: [Watch the Demo](https://drive.google.com/file/d/1URTk-HNg7_t2jUC8kK8pKcDEIPj-SN77/view?usp=sharing)
+
 > **Revolutionizing Learning Through Artificial Intelligence**
 > 
 > *Built for students, by students - leveraging cutting-edge AI to transform how we study and learn*
