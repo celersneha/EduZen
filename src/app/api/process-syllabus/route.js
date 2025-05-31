@@ -17,12 +17,23 @@ export async function POST(req) {
     const formData = await req.formData();
 
     const file = formData.get("pdf");
+    const subjectName = formData.get("subjectName");
+
+    console.log("Received file:", file);
+    console.log("Received subjectName:", subjectName);
 
     if (!user)
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
+
+    if (!subjectName || subjectName.trim() === "") {
+      return NextResponse.json(
+        { error: "Subject name is required" },
+        { status: 400 }
+      );
+    }
 
     const student = user._id;
 
@@ -49,13 +60,11 @@ export async function POST(req) {
 
       `You are a syllabus analyzer. Extract the following information from this syllabus PDF:
 
-1. Subject Name: Extract the main subject/topic of the syllabus
-2. Description: Extract a brief description or overview of the subject
-3. Chapters and Topics: Extract all chapters and their corresponding topics
+1. Description: Extract a brief description or overview of the subject
+2. Chapters and Topics: Extract all chapters and their corresponding topics
 
 Format your response as a JSON object with this exact structure:
 {
-  "syllabusSubject": "subject name here",
   "syllabusDescription": "description here",
   "chapters": [
     {
@@ -101,6 +110,9 @@ Important rules:
       ), // Remove empty topics
     }));
 
+    // Add the user-provided subject name
+    syllabusData.syllabusSubject = subjectName;
+
     // Create subject document
     const subject = new SubjectModel(syllabusData);
     await subject.save();
@@ -112,7 +124,7 @@ Important rules:
       { new: true }
     );
 
-    return NextResponse.json(syllabusData);
+    return NextResponse.json({ success: true, subject: syllabusData });
   } catch (error) {
     console.error("Error processing syllabus:", error);
     return NextResponse.json(

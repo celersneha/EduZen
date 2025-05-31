@@ -6,12 +6,14 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, FileText } from "lucide-react";
 
 export default function AddSubject() {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState("");
+  const [subjectName, setSubjectName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
@@ -44,6 +46,11 @@ export default function AddSubject() {
       return;
     }
 
+    if (!subjectName.trim()) {
+      toast.error("Please enter a subject name");
+      return;
+    }
+
     setIsUploading(true);
 
     // Show processing toast
@@ -52,6 +59,7 @@ export default function AddSubject() {
     try {
       const formData = new FormData();
       formData.append("pdf", file);
+      formData.append("subjectName", subjectName.trim());
 
       const response = await fetch("/api/process-syllabus", {
         method: "POST",
@@ -70,6 +78,7 @@ export default function AddSubject() {
       // Reset form
       setFile(null);
       setFileName("");
+      setSubjectName("");
 
       // Redirect after successful upload with a short delay
       setTimeout(() => {
@@ -93,6 +102,18 @@ export default function AddSubject() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Subject Name Input */}
+            <div className="space-y-2">
+              <Label htmlFor="subjectName">Subject Name</Label>
+              <Input
+                id="subjectName"
+                placeholder="Enter subject name"
+                value={subjectName}
+                onChange={(e) => setSubjectName(e.target.value)}
+                required
+              />
+            </div>
+
             <div className="space-y-2">
               <label htmlFor="pdf" className="block text-sm font-medium">
                 Upload Syllabus PDF
@@ -133,7 +154,7 @@ export default function AddSubject() {
             <Button
               type="submit"
               className="w-full"
-              disabled={isUploading || !file}
+              disabled={isUploading || !file || !subjectName.trim()}
             >
               {isUploading ? (
                 <>
