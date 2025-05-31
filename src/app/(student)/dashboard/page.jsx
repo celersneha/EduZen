@@ -249,21 +249,25 @@ export default function StudentDashboard() {
                       border: "1px solid #e0e0e0",
                       borderRadius: "8px",
                     }}
-                    formatter={(value, name) => [
-                      name === "avgScore" ? `${value}%` : value,
-                      name === "avgScore" ? "Average Score" : "Tests Taken",
-                    ]}
+                    formatter={(value, name) => {
+                      if (name === "avgScore") {
+                        return [`${value}%`, "Average Score"];
+                      } else if (name === "testsAttempted") {
+                        return [value, "Tests Taken"];
+                      }
+                      return [value, name];
+                    }}
                   />
                   <Bar
                     dataKey="avgScore"
                     fill="#3B82F6"
-                    name="Average Score %"
+                    name="avgScore"
                     radius={[2, 2, 0, 0]}
                   />
                   <Bar
                     dataKey="testsAttempted"
                     fill="#10B981"
-                    name="Tests Taken"
+                    name="testsAttempted"
                     radius={[2, 2, 0, 0]}
                   />
                 </RechartsBarChart>
