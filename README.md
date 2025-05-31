@@ -1,4 +1,4 @@
-# 📚 EduZen - AI-Powered Education Platform
+# 📚 EduZen: AI-Powered Learning Companion
 
 > **Revolutionizing Learning Through Artificial Intelligence**
 > 
