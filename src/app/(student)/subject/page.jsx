@@ -13,11 +13,24 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, FileText, BarChart3 } from "lucide-react";
+import {
+  BookOpen,
+  FileText,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function SubjectPage() {
   const [subject, setSubject] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showSyllabus, setShowSyllabus] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
@@ -59,7 +72,7 @@ export default function SubjectPage() {
   }, [session, subjectID, router]);
 
   const handleShowSyllabus = () => {
-    router.push(`/syllabus-details?subjectID=${subjectID}`);
+    router.push(`/syllabus?subjectID=${subjectID}`);
   };
 
   const handleAttemptTest = () => {
@@ -70,6 +83,10 @@ export default function SubjectPage() {
   const handleShowDashboard = () => {
     toast.info("Dashboard functionality coming soon!");
     // This will be implemented later
+  };
+
+  const toggleSyllabus = () => {
+    setShowSyllabus(!showSyllabus);
   };
 
   if (loading) {
@@ -97,13 +114,13 @@ export default function SubjectPage() {
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">{subject.syllabusSubject}</h1>
+        <h1 className="text-3xl font-bold">{subject.subjectName}</h1>
         <p className="text-muted-foreground mt-2">
           {subject.syllabusDescription}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Show Syllabus Card */}
         <Card className="hover:shadow-lg transition-all">
           <CardHeader className="pb-2">
@@ -177,6 +194,73 @@ export default function SubjectPage() {
           </CardFooter>
         </Card>
       </div>
+
+      {/* Full-width expandable syllabus card */}
+      <Card
+        className="w-full mt-6 cursor-pointer hover:shadow-md transition-shadow"
+        onClick={!showSyllabus ? toggleSyllabus : undefined}
+      >
+        <CardHeader className="flex flex-row items-center justify-between p-4">
+          <CardTitle className="text-lg flex items-center">
+            <BookOpen className="mr-2 h-5 w-5" />
+            {showSyllabus ? "Syllabus Content" : "Click to view full syllabus"}
+          </CardTitle>
+          {!showSyllabus && <ChevronDown className="h-5 w-5 text-gray-500" />}
+        </CardHeader>
+
+        {showSyllabus && (
+          <>
+            <CardContent className="pt-0 px-4 pb-3">
+              <div className="border rounded-md p-4 mb-4">
+                <h3 className="font-medium text-lg mb-2">
+                  Subject: {subject.subjectName}
+                </h3>
+                <p className="text-muted-foreground">
+                  {subject.syllabusDescription}
+                </p>
+              </div>
+
+              <Accordion type="single" collapsible className="w-full">
+                {subject.chapters &&
+                  subject.chapters.map((chapter, index) => (
+                    <AccordionItem key={index} value={`chapter-${index}`}>
+                      <AccordionTrigger className="font-medium">
+                        {chapter.chapterName}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <ul className="pl-6 space-y-1">
+                          {chapter.topics &&
+                            chapter.topics.map((topic, topicIndex) => (
+                              <li
+                                key={topicIndex}
+                                className="list-disc text-sm"
+                              >
+                                {topic}
+                              </li>
+                            ))}
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+              </Accordion>
+            </CardContent>
+
+            <CardFooter className="flex justify-center pb-4">
+              <Button
+                variant="outline"
+                className="flex items-center"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleSyllabus();
+                }}
+              >
+                <ChevronUp className="mr-2 h-4 w-4" />
+                Hide Syllabus
+              </Button>
+            </CardFooter>
+          </>
+        )}
+      </Card>
     </div>
   );
 }
