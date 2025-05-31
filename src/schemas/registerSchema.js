@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const registerSchema = z
   .object({
-    studentName: z
+    name: z
       .string()
       .trim()
       .min(1, "Student name is required")
@@ -10,7 +10,7 @@ export const registerSchema = z
         /^[^\s].*[^\s]$/,
         "Student name must not contain leading or trailing spaces"
       ),
-    studentEmail: z
+    email: z
       .string()
       .trim()
       .email("Invalid email address")
