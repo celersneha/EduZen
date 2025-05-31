@@ -14,11 +14,19 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   BookOpen,
   FileText,
   BarChart3,
   ChevronDown,
   ChevronUp,
+  PlayCircle,
 } from "lucide-react";
 import {
   Accordion,
@@ -31,6 +39,10 @@ export default function SubjectPage() {
   const [subject, setSubject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showSyllabus, setShowSyllabus] = useState(false);
+  const [showTestSection, setShowTestSection] = useState(false);
+  const [selectedChapter, setSelectedChapter] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("medium");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
@@ -80,6 +92,16 @@ export default function SubjectPage() {
     // This will be implemented later
   };
 
+  const handleStartTest = () => {
+    if (!selectedChapter || !selectedTopic) {
+      toast.error("Please select both chapter and topic to start the test");
+      return;
+    }
+
+    // Navigate to test page with selected chapter, topic, and difficulty
+    router.push(`/attempt-test?subjectID=${subjectID}&chapter=${encodeURIComponent(selectedChapter)}&topic=${encodeURIComponent(selectedTopic)}&difficulty=${selectedDifficulty}`);
+  };
+
   const handleShowDashboard = () => {
     toast.info("Dashboard functionality coming soon!");
     // This will be implemented later
@@ -87,6 +109,29 @@ export default function SubjectPage() {
 
   const toggleSyllabus = () => {
     setShowSyllabus(!showSyllabus);
+  };
+
+  const toggleTestSection = () => {
+    setShowTestSection(!showTestSection);
+    if (!showTestSection) {
+      // Reset selections when opening
+      setSelectedChapter("");
+      setSelectedTopic("");
+      setSelectedDifficulty("medium");
+    }
+  };
+
+  const handleChapterChange = (chapterName) => {
+    setSelectedChapter(chapterName);
+    setSelectedTopic(""); // Reset topic when chapter changes
+  };
+
+  const getSelectedChapterTopics = () => {
+    if (!selectedChapter || !subject?.chapters) return [];
+    const chapter = subject.chapters.find(
+      (ch) => ch.chapterName === selectedChapter
+    );
+    return chapter?.topics || [];
   };
 
   if (loading) {
@@ -194,6 +239,147 @@ export default function SubjectPage() {
           </CardFooter>
         </Card>
       </div>
+
+      {/* Full-width expandable test section */}
+      <Card
+        className="w-full mt-6 cursor-pointer hover:shadow-md transition-shadow"
+        onClick={!showTestSection ? toggleTestSection : undefined}
+      >
+        <CardHeader className="flex flex-row items-center justify-between p-4">
+          <CardTitle className="text-lg flex items-center">
+            <FileText className="mr-2 h-5 w-5" />
+            {showTestSection ? "Select Test Topic" : "Click to attempt test"}
+          </CardTitle>
+          {!showTestSection && <ChevronDown className="h-5 w-5 text-gray-500" />}
+        </CardHeader>
+
+        {showTestSection && (
+          <>
+            <CardContent className="pt-0 px-4 pb-3">
+              <div className="border rounded-md p-4 mb-4">
+                <h3 className="font-medium text-lg mb-2">
+                  Choose Test Parameters
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Select a chapter and specific topic to take a focused test
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Chapter Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Select Chapter</label>
+                    <Select
+                      value={selectedChapter}
+                      onValueChange={handleChapterChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a chapter" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subject?.chapters?.map((chapter, index) => (
+                          <SelectItem key={index} value={chapter.chapterName}>
+                            {chapter.chapterName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Topic Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Select Topic</label>
+                    <Select
+                      value={selectedTopic}
+                      onValueChange={setSelectedTopic}
+                      disabled={!selectedChapter}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a topic" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getSelectedChapterTopics().map((topic, index) => (
+                          <SelectItem key={index} value={topic}>
+                            {topic}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Difficulty Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Select Difficulty</label>
+                    <Select
+                      value={selectedDifficulty}
+                      onValueChange={setSelectedDifficulty}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose difficulty" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="easy">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                            Easy
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="medium">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                            Medium
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="hard">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                            Hard
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {selectedChapter && selectedTopic && (
+                  <div className="mt-4 p-3 bg-muted rounded-md">
+                    <p className="text-sm">
+                      <strong>Selected:</strong> {selectedChapter} → {selectedTopic}
+                      <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs capitalize">
+                        {selectedDifficulty}
+                      </span>
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-center">
+                <Button
+                  onClick={handleStartTest}
+                  disabled={!selectedChapter || !selectedTopic}
+                  className="flex items-center px-6 py-2"
+                >
+                  <PlayCircle className="mr-2 h-4 w-4" />
+                  Start Test
+                </Button>
+              </div>
+            </CardContent>
+
+            <CardFooter className="flex justify-center pb-4">
+              <Button
+                variant="outline"
+                className="flex items-center"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleTestSection();
+                }}
+              >
+                <ChevronUp className="mr-2 h-4 w-4" />
+                Hide Test Section
+              </Button>
+            </CardFooter>
+          </>
+        )}
+      </Card>
 
       {/* Full-width expandable syllabus card */}
       <Card
