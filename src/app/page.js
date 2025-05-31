@@ -25,11 +25,12 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
             <div className="md:w-1/2 space-y-6">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-                The Only AI For{" "}
+                The Ultimate
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-                  Respond
-                </span>{" "}
-                To Your Learning
+                  {" "}
+                  AI{" "}
+                </span>
+                Your Learning Assistance
               </h1>
               <p className="text-lg text-gray-600 md:pr-8">
                 EduZen leverages AI to help you master your subjects, track
@@ -70,77 +71,106 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600"></div>
                   <div className="absolute inset-0 opacity-20 bg-[url('/grid-pattern.svg')]"></div>
 
-                  <div className="absolute right-4 top-10 bg-white rounded-2xl shadow-lg p-4 w-64">
+                  {/* AI Syllabus Processing Card */}
+                  <div className="absolute right-4 top-6 bg-white rounded-2xl shadow-lg p-4 w-64">
                     <div className="flex items-start gap-3">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-blue-600 font-semibold">Z</span>
+                        <BookOpen className="h-4 w-4 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium">EduZen AI</p>
+                        <p className="text-sm font-medium">
+                          AI Syllabus Analyzer
+                        </p>
                         <p className="text-xs text-gray-500">
-                          How are you doing my friend?
+                          Processing PDF...
                         </p>
                       </div>
                     </div>
-                    <div className="mt-3 p-2 bg-gray-50 rounded-lg">
-                      <p className="text-xs">
-                        All messages are answered instantly!
+                    <div className="mt-3 p-2 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-xs text-green-800">
+                        ✓ 12 chapters extracted
+                      </p>
+                      <p className="text-xs text-green-800">
+                        ✓ 45 topics organized
                       </p>
                       <div className="flex justify-end mt-1">
-                        <span className="text-xs text-gray-400">2m ago</span>
+                        <span className="text-xs text-gray-400">Just now</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="absolute right-24 bottom-10 bg-white rounded-2xl shadow-lg p-4 w-72">
+                  {/* Test Generation Card */}
+                  <div className="absolute right-24 bottom-8 bg-white rounded-2xl shadow-lg p-4 w-72">
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                          <span className="text-purple-600 font-semibold">
-                            B
-                          </span>
+                          <BrainCircuit className="h-4 w-4 text-purple-600" />
                         </div>
-                        <p className="text-sm font-medium">Ben Timona</p>
+                        <p className="text-sm font-medium">AI Test Generator</p>
                       </div>
                       <Button
                         size="sm"
-                        className="bg-blue-600 text-white text-xs px-3"
+                        className="bg-purple-600 text-white text-xs px-3"
                       >
-                        Answer
+                        Generate
                       </Button>
                     </div>
-                    <p className="text-xs">
-                      Hey there! I need to prep for a question...
+                    <p className="text-xs text-gray-600">
+                      Chapter: Data Structures • Difficulty: Medium
                     </p>
                     <div className="flex justify-between items-center mt-2">
                       <div className="flex items-center gap-1">
-                        <div className="w-4 h-4 bg-gray-100 rounded-full"></div>
-                        <span className="text-xs">26 Jan 2024</span>
+                        <div className="w-4 h-4 bg-purple-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs text-purple-600">Q</span>
+                        </div>
+                        <span className="text-xs">10 questions ready</span>
                       </div>
-                      <span className="text-xs text-blue-600 underline">
-                        View details →
+                      <span className="text-xs text-purple-600 underline">
+                        Start Test →
                       </span>
                     </div>
                   </div>
 
+                  {/* Performance Analytics Icons */}
                   <div className="absolute left-4 bottom-16 flex items-end">
-                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center z-10">
-                      <BrainCircuit className="h-6 w-6 text-red-600" />
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center z-10">
+                      <BarChart3 className="h-6 w-6 text-green-600" />
                     </div>
-                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center -ml-4">
-                      <BookOpen className="h-5 w-5 text-purple-600" />
+                    <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center -ml-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-yellow-600"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="m9 12 2 2 4-4" />
+                      </svg>
                     </div>
+                  </div>
+
+                  {/* AI Insights Badge */}
+                  <div className="absolute left-4 top-8 bg-white/90 backdrop-blur rounded-lg px-3 py-2">
+                    <p className="text-xs font-medium text-gray-800">
+                      🤖 AI-Powered Learning
+                    </p>
                   </div>
                 </div>
 
                 <div className="mt-4 px-2">
                   <p className="text-center font-medium">
-                    Answered to 12 private messages!
+                    85% improvement in test scores!
                   </p>
                   <div className="mt-2 h-1.5 w-full bg-gray-100 rounded-full">
                     <div
-                      className="h-1.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
-                      style={{ width: "75%" }}
+                      className="h-1.5 bg-gradient-to-r from-green-500 to-blue-600 rounded-full"
+                      style={{ width: "85%" }}
                     ></div>
                   </div>
                 </div>
