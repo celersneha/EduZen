@@ -216,7 +216,6 @@ Clean interface showing all your subjects with AI-extracted content
 ![Screenshot](public/upload-subject.png)
 
 
-
 ### 🧪 **AI Test Interface**
 Intuitive test-taking experience with real-time AI feedback
 
