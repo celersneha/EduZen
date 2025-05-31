@@ -16,7 +16,7 @@ export async function GET(req) {
         { status: 401 }
       );
 
-    const studentId = user._id;
+    const studentId = user.id;
 
     // Get the full user document with populated subjects
     const studentWithSubjects = await StudentModel.findById(studentId).populate(
