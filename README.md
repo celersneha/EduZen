@@ -7,7 +7,7 @@
 > **🏆 Developed by Team DuoSyntax for the "AI for Impact" Hackathon 🏆**
 
 [![AI-Powered](https://img.shields.io/badge/AI-Powered-blue.svg)](https://github.com/yourusername/eduzen)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![Google Gemini](https://img.shields.io/badge/Google-Gemini%20AI-4285F4.svg)](https://ai.google.dev/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248.svg)](https://mongodb.com/)
 [![Hackathon](https://img.shields.io/badge/Hackathon-AI%20for%20Impact-gold.svg)](https://github.com/yourusername/eduzen)
