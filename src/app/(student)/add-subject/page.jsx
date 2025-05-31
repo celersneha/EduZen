@@ -61,7 +61,7 @@ export default function AddSubject() {
       formData.append("pdf", file);
       formData.append("subjectName", subjectName.trim());
 
-      const response = await fetch("/api/process-syllabus", {
+      const response = await fetch("/api/add-subject", {
         method: "POST",
         body: formData,
       });

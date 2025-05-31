@@ -24,7 +24,7 @@ export default function ShowSubjects() {
     const fetchSubjects = async () => {
       try {
         const loadingToast = toast.loading("Loading your subjects...");
-        const response = await fetch("/api/show-syllabuses");
+        const response = await fetch("/api/show-subjects");
         toast.dismiss(loadingToast);
 
         if (!response.ok) {
@@ -47,7 +47,7 @@ export default function ShowSubjects() {
   }, [session]);
 
   const handleSubjectClick = (subjectId) => {
-    router.push(`/subject-details?subjectID=${subjectId}`);
+    router.push(`/subject?subjectID=${subjectId}`);
   };
 
   const handleAddSubjectClick = () => {
