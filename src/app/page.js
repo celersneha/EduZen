@@ -25,17 +25,18 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
             <div className="md:w-1/2 space-y-6">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-                The Ultimate
+                The Future of
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
                   {" "}
-                  AI{" "}
+                  Smart{" "}
                 </span>
-                Your Learning Assistance
+                Classroom Management
               </h1>
+
               <p className="text-lg text-gray-600 md:pr-8">
-                EduZen leverages AI to help you master your subjects, track
-                progress, and ace your tests. Upload your syllabus and let our
-                AI generate personalized quizzes in seconds.
+                EduZen streamlines classrooms with AI—manage attendance,
+                resources, and safety. Track progress, get insights, and enhance
+                learning with real-time analytics.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link href="/register">
@@ -66,113 +67,136 @@ export default function Home() {
             </div>
 
             <div className="md:w-1/2 relative">
-              <div className="bg-white rounded-2xl shadow-xl p-2 md:p-4 border border-gray-100">
-                <div className="relative aspect-[5/3] rounded-xl overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600"></div>
-                  <div className="absolute inset-0 opacity-20 bg-[url('/grid-pattern.svg')]"></div>
-
-                  {/* AI Syllabus Processing Card */}
-                  <div className="absolute right-4 top-6 bg-white rounded-2xl shadow-lg p-4 w-64">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <BookOpen className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">
-                          AI Syllabus Analyzer
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Processing PDF...
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-3 p-2 bg-green-50 rounded-lg border border-green-200">
-                      <p className="text-xs text-green-800">
-                        ✓ 12 chapters extracted
-                      </p>
-                      <p className="text-xs text-green-800">
-                        ✓ 45 topics organized
-                      </p>
-                      <div className="flex justify-end mt-1">
-                        <span className="text-xs text-gray-400">Just now</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Test Generation Card */}
-                  <div className="absolute right-24 bottom-8 bg-white rounded-2xl shadow-lg p-4 w-72">
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                          <BrainCircuit className="h-4 w-4 text-purple-600" />
-                        </div>
-                        <p className="text-sm font-medium">AI Test Generator</p>
-                      </div>
-                      <Button
-                        size="sm"
-                        className="bg-purple-600 text-white text-xs px-3"
-                      >
-                        Generate
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      Chapter: Data Structures • Difficulty: Medium
-                    </p>
-                    <div className="flex justify-between items-center mt-2">
-                      <div className="flex items-center gap-1">
-                        <div className="w-4 h-4 bg-purple-100 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-purple-600">Q</span>
-                        </div>
-                        <span className="text-xs">10 questions ready</span>
-                      </div>
-                      <span className="text-xs text-purple-600 underline">
-                        Start Test →
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Performance Analytics Icons */}
-                  <div className="absolute left-4 bottom-16 flex items-end">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center z-10">
-                      <BarChart3 className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center -ml-4">
+              <div className="bg-white rounded-2xl shadow-2xl p-4 border border-gray-100 backdrop-blur-sm">
+                <div className="relative grid grid-cols-2 gap-4">
+                  {/* Attendance Automation Card */}
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-lg p-4 transform hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mb-3">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="20"
                         height="20"
-                        viewBox="0 0 24 24"
                         fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-yellow-600"
+                        viewBox="0 0 24 24"
+                        className="text-white"
                       >
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="m9 12 2 2 4-4" />
+                        <path
+                          fill="currentColor"
+                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+                        />
                       </svg>
+                    </div>
+                    <h3 className="text-sm font-bold text-blue-800 mb-1">
+                      Attendance Automation
+                    </h3>
+                    <p className="text-xs text-blue-600">
+                      Facial recognition & real-time tracking
+                    </p>
+                    <div className="mt-2 flex items-center text-xs text-blue-500">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-1"></div>
+                      <span>Active</span>
                     </div>
                   </div>
 
-                  {/* AI Insights Badge */}
-                  <div className="absolute left-4 top-8 bg-white/90 backdrop-blur rounded-lg px-3 py-2">
-                    <p className="text-xs font-medium text-gray-800">
-                      🤖 AI-Powered Learning
+                  {/* Resource Management Card */}
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-lg p-4 transform hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mb-3">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="text-white"
+                      >
+                        <rect x="2" y="4" width="20" height="16" rx="2" />
+                        <path d="M7 15h10M7 11h6" />
+                      </svg>
+                    </div>
+                    <h3 className="text-sm font-bold text-green-800 mb-1">
+                      Resource Management
+                    </h3>
+                    <p className="text-xs text-green-600">
+                      Smart scheduling & maintenance
                     </p>
+                    <div className="mt-2 text-xs text-green-500">
+                      <span>95% efficiency</span>
+                    </div>
+                  </div>
+
+                  {/* Safety & Security Card */}
+                  <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl shadow-lg p-4 transform hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center mb-3">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="text-white"
+                      >
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <path d="M9 12l2 2 4-4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-sm font-bold text-red-800 mb-1">
+                      Safety & Security
+                    </h3>
+                    <p className="text-xs text-red-600">
+                      Real-time alerts & monitoring
+                    </p>
+                    <div className="mt-2 flex items-center text-xs text-red-500">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-1"></div>
+                      <span>Secure</span>
+                    </div>
+                  </div>
+
+                  {/* Interactive Learning Card */}
+                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-lg p-4 transform hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="text-white"
+                      >
+                        <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-sm font-bold text-purple-800 mb-1">
+                      Interactive Learning
+                    </h3>
+                    <p className="text-xs text-purple-600">
+                      Smart boards & AI analytics
+                    </p>
+                    <div className="mt-2 text-xs text-purple-500">
+                      <span>85% engagement</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-4 px-2">
-                  <p className="text-center font-medium">
-                    85% improvement in test scores!
-                  </p>
-                  <div className="mt-2 h-1.5 w-full bg-gray-100 rounded-full">
-                    <div
-                      className="h-1.5 bg-gradient-to-r from-green-500 to-blue-600 rounded-full"
-                      style={{ width: "85%" }}
-                    ></div>
-                  </div>
+                {/* Central AI Hub Indicator */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="text-white"
+                  >
+                    <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
                 </div>
               </div>
             </div>
