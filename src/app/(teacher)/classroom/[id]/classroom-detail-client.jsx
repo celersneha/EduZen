@@ -28,8 +28,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { inviteStudents } from '@/actions/invite-students';
 import { uploadClassroomSyllabus } from '@/actions/upload-classroom-syllabus';
+import { createAnnouncement } from '@/actions/create-announcement';
+import { uploadVideoLecture } from '@/actions/upload-video-lecture';
+import { Megaphone, Pin, Send, Video, Upload as UploadIcon, Play, Clock } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
-export function ClassroomDetailClient({ classroom }) {
+export function ClassroomDetailClient({ classroom, announcements = [], videoLectures = [] }) {
   const router = useRouter();
   const [file, setFile] = useState(null);
   const [subjectName, setSubjectName] = useState('');
@@ -37,6 +41,18 @@ export function ClassroomDetailClient({ classroom }) {
   const [inviteEmails, setInviteEmails] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
+  const [announcementTitle, setAnnouncementTitle] = useState('');
+  const [announcementContent, setAnnouncementContent] = useState('');
+  const [isPinned, setIsPinned] = useState(false);
+  const [isPostingAnnouncement, setIsPostingAnnouncement] = useState(false);
+  const [showVideoUploadForm, setShowVideoUploadForm] = useState(false);
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoTitle, setVideoTitle] = useState('');
+  const [videoDescription, setVideoDescription] = useState('');
+  const [videoChapter, setVideoChapter] = useState('');
+  const [videoTopic, setVideoTopic] = useState('');
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -123,6 +139,126 @@ export function ClassroomDetailClient({ classroom }) {
     setCopied(true);
     toast.success('Join link copied to clipboard!');
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handlePostAnnouncement = async (e) => {
+    e.preventDefault();
+    if (!announcementTitle.trim() || !announcementContent.trim()) {
+      toast.error('Please fill in both title and content');
+      return;
+    }
+
+    setIsPostingAnnouncement(true);
+    try {
+      const { data, error } = await createAnnouncement({
+        classroomId: classroom.id,
+        title: announcementTitle.trim(),
+        content: announcementContent.trim(),
+        isPinned,
+      });
+
+      if (error) {
+        toast.error(error);
+        return;
+      }
+
+      toast.success('Announcement posted successfully!');
+      setAnnouncementTitle('');
+      setAnnouncementContent('');
+      setIsPinned(false);
+      setShowAnnouncementForm(false);
+      router.refresh();
+    } catch (error) {
+      console.error('Error posting announcement:', error);
+      toast.error('Failed to post announcement');
+    } finally {
+      setIsPostingAnnouncement(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const handleVideoFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      if (selectedFile.type.startsWith('video/')) {
+        // Validate file size (500MB max)
+        const maxSize = 500 * 1024 * 1024;
+        if (selectedFile.size > maxSize) {
+          toast.error('Video file size exceeds 500MB limit');
+          return;
+        }
+        setVideoFile(selectedFile);
+      } else {
+        toast.error('Please select a video file');
+      }
+    }
+  };
+
+  const formatDuration = (seconds) => {
+    if (!seconds) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes) return '0 B';
+    const mb = bytes / (1024 * 1024);
+    if (mb >= 1) {
+      return `${mb.toFixed(2)} MB`;
+    }
+    const kb = bytes / 1024;
+    return `${kb.toFixed(2)} KB`;
+  };
+
+  const handleVideoUpload = async (e) => {
+    e.preventDefault();
+    if (!videoFile || !videoTitle.trim()) {
+      toast.error('Please select a video file and enter a title');
+      return;
+    }
+
+    setIsUploadingVideo(true);
+    try {
+      const formData = new FormData();
+      formData.append('video', videoFile);
+      formData.append('title', videoTitle.trim());
+      formData.append('description', videoDescription.trim());
+      formData.append('classroomId', classroom.id);
+      formData.append('chapter', videoChapter.trim());
+      formData.append('topic', videoTopic.trim());
+
+      const { data, error } = await uploadVideoLecture(formData);
+
+      if (error) {
+        toast.error(error);
+        return;
+      }
+
+      toast.success('Video lecture uploaded successfully!');
+      setVideoFile(null);
+      setVideoTitle('');
+      setVideoDescription('');
+      setVideoChapter('');
+      setVideoTopic('');
+      setShowVideoUploadForm(false);
+      router.refresh();
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      toast.error('Failed to upload video lecture');
+    } finally {
+      setIsUploadingVideo(false);
+    }
   };
 
   return (
@@ -300,6 +436,318 @@ export function ClassroomDetailClient({ classroom }) {
                 )}
               </Button>
             </form>
+          </CardContent>
+        </Card>
+
+        {/* Announcements Section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center">
+                  <Megaphone className="h-5 w-5 mr-2" />
+                  Announcements
+                </CardTitle>
+                <CardDescription>
+                  Post important updates and announcements for your students
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => setShowAnnouncementForm(!showAnnouncementForm)}
+                variant="outline"
+              >
+                {showAnnouncementForm ? 'Cancel' : 'New Announcement'}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {showAnnouncementForm && (
+              <form
+                onSubmit={handlePostAnnouncement}
+                className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4"
+              >
+                <div>
+                  <Label htmlFor="announcementTitle">Title</Label>
+                  <Input
+                    id="announcementTitle"
+                    placeholder="e.g., Midterm Exam Date"
+                    value={announcementTitle}
+                    onChange={(e) => setAnnouncementTitle(e.target.value)}
+                    disabled={isPostingAnnouncement}
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="announcementContent">Content</Label>
+                  <Textarea
+                    id="announcementContent"
+                    placeholder="Write your announcement here..."
+                    value={announcementContent}
+                    onChange={(e) => setAnnouncementContent(e.target.value)}
+                    disabled={isPostingAnnouncement}
+                    rows={4}
+                    className="mt-2 resize-none"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="pinAnnouncement"
+                    checked={isPinned}
+                    onCheckedChange={setIsPinned}
+                    disabled={isPostingAnnouncement}
+                  />
+                  <Label
+                    htmlFor="pinAnnouncement"
+                    className="text-sm font-normal cursor-pointer flex items-center"
+                  >
+                    <Pin className="h-4 w-4 mr-1" />
+                    Pin this announcement
+                  </Label>
+                </div>
+                <Button
+                  type="submit"
+                  disabled={isPostingAnnouncement}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
+                >
+                  {isPostingAnnouncement ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Posting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-4 w-4" />
+                      Post Announcement
+                    </>
+                  )}
+                </Button>
+              </form>
+            )}
+
+            <div className="space-y-4">
+              {announcements.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Megaphone className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                  <p>No announcements yet. Create one to keep students informed!</p>
+                </div>
+              ) : (
+                announcements.map((announcement) => (
+                  <div
+                    key={announcement.id}
+                    className={`p-4 rounded-lg border ${
+                      announcement.isPinned
+                        ? 'bg-yellow-50 border-yellow-200'
+                        : 'bg-white border-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-lg">
+                          {announcement.title}
+                        </h3>
+                        {announcement.isPinned && (
+                          <Pin className="h-4 w-4 text-yellow-600 fill-yellow-600" />
+                        )}
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {formatDate(announcement.createdAt)}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 whitespace-pre-wrap">
+                      {announcement.content}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Posted by {announcement.teacherName}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Video Lectures Section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center">
+                  <Video className="h-5 w-5 mr-2" />
+                  Video Lectures
+                </CardTitle>
+                <CardDescription>
+                  Upload and manage video lectures for your students
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => setShowVideoUploadForm(!showVideoUploadForm)}
+                variant="outline"
+              >
+                {showVideoUploadForm ? 'Cancel' : 'Upload Video'}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {showVideoUploadForm && (
+              <form
+                onSubmit={handleVideoUpload}
+                className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4"
+              >
+                <div>
+                  <Label htmlFor="videoFile">Video File</Label>
+                  <Input
+                    id="videoFile"
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoFileChange}
+                    disabled={isUploadingVideo}
+                    className="mt-2"
+                  />
+                  {videoFile && (
+                    <p className="text-sm text-gray-600 mt-2">
+                      Selected: {videoFile.name} ({formatFileSize(videoFile.size)})
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Maximum file size: 500MB. Supported formats: MP4, WebM, etc.
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="videoTitle">Title *</Label>
+                  <Input
+                    id="videoTitle"
+                    placeholder="e.g., Introduction to Calculus"
+                    value={videoTitle}
+                    onChange={(e) => setVideoTitle(e.target.value)}
+                    disabled={isUploadingVideo}
+                    className="mt-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="videoDescription">Description</Label>
+                  <Textarea
+                    id="videoDescription"
+                    placeholder="Brief description of the video lecture..."
+                    value={videoDescription}
+                    onChange={(e) => setVideoDescription(e.target.value)}
+                    disabled={isUploadingVideo}
+                    rows={3}
+                    className="mt-2 resize-none"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="videoChapter">Chapter (Optional)</Label>
+                    <Input
+                      id="videoChapter"
+                      placeholder="e.g., Chapter 1"
+                      value={videoChapter}
+                      onChange={(e) => setVideoChapter(e.target.value)}
+                      disabled={isUploadingVideo}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="videoTopic">Topic (Optional)</Label>
+                    <Input
+                      id="videoTopic"
+                      placeholder="e.g., Limits and Continuity"
+                      value={videoTopic}
+                      onChange={(e) => setVideoTopic(e.target.value)}
+                      disabled={isUploadingVideo}
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  disabled={isUploadingVideo || !videoFile || !videoTitle.trim()}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
+                >
+                  {isUploadingVideo ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading video...
+                    </>
+                  ) : (
+                    <>
+                      <UploadIcon className="mr-2 h-4 w-4" />
+                      Upload Video Lecture
+                    </>
+                  )}
+                </Button>
+              </form>
+            )}
+
+            <div className="space-y-4">
+              {videoLectures.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Video className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                  <p>No video lectures yet. Upload one to get started!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {videoLectures.map((lecture) => (
+                    <div
+                      key={lecture.id}
+                      className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                    >
+                      {lecture.thumbnailUrl ? (
+                        <div className="relative aspect-video bg-gray-100">
+                          <img
+                            src={lecture.thumbnailUrl}
+                            alt={lecture.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                            <Play className="h-12 w-12 text-white" />
+                          </div>
+                          {lecture.duration > 0 && (
+                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {formatDuration(lecture.duration)}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="aspect-video bg-gray-100 flex items-center justify-center">
+                          <Video className="h-12 w-12 text-gray-400" />
+                        </div>
+                      )}
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg mb-1 line-clamp-2">
+                          {lecture.title}
+                        </h3>
+                        {lecture.description && (
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                            {lecture.description}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>{formatFileSize(lecture.fileSize)}</span>
+                          <span>{formatDate(lecture.createdAt)}</span>
+                        </div>
+                        {(lecture.chapter || lecture.topic) && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {lecture.chapter && (
+                              <Badge variant="outline" className="text-xs">
+                                {lecture.chapter}
+                              </Badge>
+                            )}
+                            {lecture.topic && (
+                              <Badge variant="outline" className="text-xs">
+                                {lecture.topic}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

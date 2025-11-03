@@ -12,6 +12,7 @@ export const config = {
     "/syllabus",
     "/teacher/:path*",
     "/classroom/:path*",
+    "/student/classroom/:path*",
     "/login",
     "/register",
     "/verify/:path*",
@@ -30,6 +31,7 @@ export async function middleware(request) {
     "/show-subjects",
     "/subject",
     "/syllabus",
+    "/student/classroom",
   ];
 
   // Protected teacher routes - require teacher role

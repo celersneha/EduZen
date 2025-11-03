@@ -1,20 +1,20 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import { getClassrooms } from '@/fetchers/get-classrooms';
 import { getAnnouncements } from '@/fetchers/get-announcements';
+import { getClassrooms } from '@/fetchers/get-classrooms';
 import { getVideoLectures } from '@/fetchers/get-video-lectures';
-import { ClassroomDetailClient } from './classroom-detail-client';
+import { StudentClassroomDetailClient } from './student-classroom-detail-client';
 
 export const metadata = {
-  title: 'Classroom Management | EduZen',
-  description: 'Manage your classroom, upload syllabus, and invite students',
+  title: 'Classroom Details | EduZen',
+  description: 'View classroom announcements, video lectures, and syllabus',
 };
 
-export default async function ClassroomDetailPage({ params }) {
+export default async function StudentClassroomDetailPage({ params }) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || session.user.role !== 'teacher') {
+  if (!session?.user || session.user.role !== 'student') {
     redirect('/dashboard');
   }
 
@@ -27,7 +27,7 @@ export default async function ClassroomDetailPage({ params }) {
   const classroom = classrooms?.find((c) => c.id === params.id);
 
   if (!classroom) {
-    redirect('/teacher/dashboard');
+    redirect('/classroom/list');
   }
 
   const { data: announcements, error: announcementsError } =
@@ -37,10 +37,11 @@ export default async function ClassroomDetailPage({ params }) {
     await getVideoLectures(params.id);
 
   return (
-    <ClassroomDetailClient
+    <StudentClassroomDetailClient
       classroom={classroom}
       announcements={announcements || []}
       videoLectures={videoLectures || []}
     />
   );
 }
+

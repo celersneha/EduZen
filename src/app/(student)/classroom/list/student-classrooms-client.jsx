@@ -99,7 +99,7 @@ export function StudentClassroomsClient({ classrooms, error }) {
                       )}
                     </div>
 
-                    <Link href={`/subject?classroomId=${classroom.id}`}>
+                    <Link href={`/student/classroom/${classroom.id}`}>
                       <Button className="w-full" variant="outline">
                         View Classroom
                         <ArrowRight className="ml-2 h-4 w-4" />
