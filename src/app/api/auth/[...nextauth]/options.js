@@ -2,7 +2,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbConnect";
 import sendVerificationEmail from "@/utils/sendVerificationEmail";
-import StudentModel from "@/models/student.model";
+import UserModel from "@/models/user.model";
 
 export const authOptions = {
   providers: [
@@ -17,7 +17,7 @@ export const authOptions = {
         await dbConnect();
 
         try {
-          const user = await StudentModel.findOne({
+          const user = await UserModel.findOne({
             $or: [
               { email: credentials.identifier },
               { username: credentials.identifier },
@@ -55,8 +55,11 @@ export const authOptions = {
           }
 
           return {
-            ...user.toObject(),
             id: user._id.toString(),
+            email: user.email,
+            username: user.username,
+            name: user.name,
+            role: user.role,
           };
         } catch (err) {
           throw new Error(err.message);
@@ -73,6 +76,7 @@ export const authOptions = {
         token.email = user.email;
         token.username = user.username;
         token.name = user.name;
+        token.role = user.role;
       }
       return token;
     },
@@ -83,6 +87,7 @@ export const authOptions = {
         session.user.email = token.email;
         session.user.username = token.username;
         session.user.name = token.name;
+        session.user.role = token.role;
       }
       return session;
     },

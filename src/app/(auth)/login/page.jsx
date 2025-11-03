@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -26,7 +26,7 @@ const formSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-export default function LoginPage() {
+function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", content: "" });
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function LoginPage() {
   });
 
   // Check for verification success message
-  useState(() => {
+  useEffect(() => {
     if (searchParams.get("verified") === "true") {
       setMessage({
         type: "success",
@@ -310,5 +310,18 @@ export default function LoginPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-white"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

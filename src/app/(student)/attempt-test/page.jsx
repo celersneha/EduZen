@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -28,9 +28,10 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpen,
+  Loader2,
 } from "lucide-react";
 
-export default function AttemptTestPage() {
+function AttemptTestPageContent() {
   const [testStarted, setTestStarted] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -146,23 +147,23 @@ export default function AttemptTestPage() {
     // Generate overall AI remarks
     await generateOverallRemarks(finalScore);
 
-    // Save test result to database
+    // Save test result to database using Server Action
     try {
-      await fetch("/api/save-test-result", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          studentId: session.user.id,
-          subjectId: subjectID,
-          chapterName: chapter,
-          topicName: topic,
-          testScore: finalScore,
-          difficultyLevel: difficulty,
-        }),
+      const { saveTestResult } = await import('@/actions/save-test-result');
+      const result = await saveTestResult({
+        studentId: session.user.id,
+        subjectId: subjectID,
+        chapterName: chapter,
+        topicName: topic,
+        testScore: finalScore,
+        difficultyLevel: difficulty,
       });
-      toast.success("Test completed and results saved!");
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Test completed and results saved!");
+      }
     } catch (error) {
       console.error("Error saving test result:", error);
       toast.error("Test completed but failed to save results");
@@ -1044,5 +1045,17 @@ export default function AttemptTestPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function AttemptTestPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <AttemptTestPageContent />
+    </Suspense>
   );
 }

@@ -1,44 +1,48 @@
-import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import SubjectModel from "@/models/subject.model";
-import dbConnect from "@/lib/dbConnect";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/options";
-import StudentModel from "@/models/student.model";
+'use server';
 
-export async function POST(req) {
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import SubjectModel from '@/models/subject.model';
+import dbConnect from '@/lib/dbConnect';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
+import StudentModel from '@/models/student.model';
+import { revalidatePath } from 'next/cache';
+
+/**
+ * Server action to add a subject by processing a syllabus PDF
+ * @param {FormData} formData - Form data containing PDF file and subject name
+ * @returns {Promise<{data: object | null, error: string | null}>}
+ */
+export async function addSubject(formData) {
   try {
-    // Connect to MongoDB
     await dbConnect();
-
     const session = await getServerSession(authOptions);
 
     const user = session?.user;
-    const formData = await req.formData();
-
-    const file = formData.get("pdf");
-    const subjectName = formData.get("subjectName");
-
-    console.log("Received file:", file);
-    console.log("Received subjectName:", subjectName);
-
-    if (!user)
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-
-    if (!subjectName || subjectName.trim() === "") {
-      return NextResponse.json(
-        { error: "Subject name is required" },
-        { status: 400 }
-      );
+    if (!user) {
+      return {
+        data: null,
+        error: 'Unauthorized',
+      };
     }
 
-    const student = user.id;
+    const file = formData.get('pdf');
+    const subjectName = formData.get('subjectName');
+
+    if (!subjectName || subjectName.trim() === '') {
+      return {
+        data: null,
+        error: 'Subject name is required',
+      };
+    }
+
+    const studentId = user.id;
 
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+      return {
+        data: null,
+        error: 'No file uploaded',
+      };
     }
 
     // Convert file to buffer and base64
@@ -47,17 +51,16 @@ export async function POST(req) {
 
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     // Process PDF with Gemini
     const result = await model.generateContent([
       {
         inlineData: {
-          data: pdfBuffer.toString("base64"),
-          mimeType: "application/pdf",
+          data: pdfBuffer.toString('base64'),
+          mimeType: 'application/pdf',
         },
       },
-
       `You are a syllabus analyzer. Extract the following information from this syllabus PDF:
 
 1. Description: Extract a brief description or overview of the subject
@@ -90,8 +93,8 @@ Important rules:
     let text = response.text().trim();
 
     // Clean up the response string
-    text = text.replace(/^```json\s*|\s*```$/g, ""); // Remove markdown code block markers
-    text = text.replace(/^["']|["']$/g, ""); // Remove surrounding quotes if any
+    text = text.replace(/^```json\s*|\s*```$/g, ''); // Remove markdown code block markers
+    text = text.replace(/^["']|["']$/g, ''); // Remove surrounding quotes if any
     text = text.replace(/\\"/g, '"'); // Replace escaped quotes with regular quotes
     text = text.trim(); // Remove any extra whitespace
 
@@ -101,37 +104,45 @@ Important rules:
     // Process topics to ensure they are clean and properly formatted
     syllabusData.chapters = syllabusData.chapters.map((chapter) => ({
       ...chapter,
-      topics: chapter.topics.map((topic) =>
-        topic
-          .trim()
-          .replace(/^\d+\.\s*/, "") // Remove leading numbers
-          .replace(/^[-•]\s*/, "") // Remove leading bullets
-          .trim()
-      ), // Remove empty topics
+      topics: chapter.topics
+        .map((topic) =>
+          topic
+            .trim()
+            .replace(/^\d+\.\s*/, '') // Remove leading numbers
+            .replace(/^[-•]\s*/, '') // Remove leading bullets
+            .trim()
+        )
+        .filter((topic) => topic.length > 0), // Remove empty topics
     }));
 
     // Add the user-provided subject name
     syllabusData.subjectName = subjectName;
 
-    console.log("Syllabus data processed:", syllabusData);
-
     // Create subject document
     const subject = new SubjectModel(syllabusData);
     await subject.save();
 
-    //update student with the new subject
+    // Update student with the new subject
     await StudentModel.findByIdAndUpdate(
-      student,
+      studentId,
       { $push: { subjects: subject._id } },
       { new: true }
     );
 
-    return NextResponse.json({ success: true, subject: syllabusData });
+    // Revalidate relevant paths
+    revalidatePath('/show-subjects');
+    revalidatePath('/dashboard');
+
+    return {
+      data: syllabusData,
+      error: null,
+    };
   } catch (error) {
-    console.error("Error processing syllabus:", error);
-    return NextResponse.json(
-      { error: "Failed to process syllabus" },
-      { status: 500 }
-    );
+    console.error('Error processing syllabus:', error);
+    return {
+      data: null,
+      error: 'Failed to process syllabus',
+    };
   }
 }
+

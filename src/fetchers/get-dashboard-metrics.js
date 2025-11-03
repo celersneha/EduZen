@@ -1,34 +1,37 @@
-import { NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect";
-import SubjectModel from "@/models/subject.model";
-import StudentModel from "@/models/student.model";
-import TestModel from "@/models/test.model";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/options";
+import dbConnect from '@/lib/dbConnect';
+import SubjectModel from '@/models/subject.model';
+import StudentModel from '@/models/student.model';
+import TestModel from '@/models/test.model';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
-export async function GET(req) {
+/**
+ * Fetcher to get dashboard metrics for a student
+ * @returns {Promise<{data: object | null, error: string | null}>}
+ */
+export async function getDashboardMetrics() {
   try {
     await dbConnect();
     const session = await getServerSession(authOptions);
 
     const user = session?.user;
     if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
+      return {
+        data: null,
+        error: 'Unauthorized',
+      };
     }
 
     const studentId = user.id;
 
     // Get student with populated subjects
-    const student = await StudentModel.findById(studentId).populate("subjects");
+    const student = await StudentModel.findById(studentId).populate('subjects');
 
     if (!student) {
-      return NextResponse.json(
-        { success: false, message: "Student not found" },
-        { status: 404 }
-      );
+      return {
+        data: null,
+        error: 'Student not found',
+      };
     }
 
     const subjects = student.subjects || [];
@@ -52,7 +55,7 @@ export async function GET(req) {
       );
     }, 0);
 
-    // Fetch all tests for this student using correct field name
+    // Fetch all tests for this student
     const tests = await TestModel.find({ studentId }).sort({ createdAt: 1 });
 
     // Calculate subject performance based on test scores
@@ -82,7 +85,7 @@ export async function GET(req) {
         : 0;
 
       return {
-        name: subject.subjectName || "Unknown Subject",
+        name: subject.subjectName || 'Unknown Subject',
         chaptersCount,
         topicsCount,
         avgScore,
@@ -90,9 +93,9 @@ export async function GET(req) {
       };
     });
 
-    // Difficulty level distribution from tests using correct field name
+    // Difficulty level distribution from tests
     const difficultyDistribution = tests.reduce((acc, test) => {
-      const difficulty = test.difficultyLevel || "medium";
+      const difficulty = test.difficultyLevel || 'medium';
       acc[difficulty] = (acc[difficulty] || 0) + 1;
       return acc;
     }, {});
@@ -102,14 +105,14 @@ export async function GET(req) {
         difficulty: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
         count,
         avgScore:
-          tests.filter((t) => (t.difficultyLevel || "medium") === difficulty)
+          tests.filter((t) => (t.difficultyLevel || 'medium') === difficulty)
             .length > 0
             ? Math.round(
                 (tests
-                  .filter((t) => (t.difficultyLevel || "medium") === difficulty)
+                  .filter((t) => (t.difficultyLevel || 'medium') === difficulty)
                   .reduce((sum, test) => sum + (test.testScore || 0), 0) /
                   tests.filter(
-                    (t) => (t.difficultyLevel || "medium") === difficulty
+                    (t) => (t.difficultyLevel || 'medium') === difficulty
                   ).length) *
                   10
               )
@@ -117,22 +120,22 @@ export async function GET(req) {
       })
     );
 
-    // Score progression over time using correct field name
+    // Score progression over time
     const scoreProgressData = tests.map((test, index) => ({
       testNumber: index + 1,
       score: (test.testScore || 0) * 10, // Convert 0-10 to 0-100 for display
-      date: new Date(test.createdAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
+      date: new Date(test.createdAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
       }),
       subject:
         subjects.find((s) => s._id.toString() === test.subject.toString())
-          ?.subjectName || "Unknown",
-      chapter: test.chapterName || "Unknown Chapter",
-      topic: test.topicName || "Unknown Topic",
+          ?.subjectName || 'Unknown',
+      chapter: test.chapterName || 'Unknown Chapter',
+      topic: test.topicName || 'Unknown Topic',
     }));
 
-    // Content mastery based on test performance using correct field name
+    // Content mastery based on test performance
     const avgTestScore =
       tests.length > 0
         ? Math.round(
@@ -142,34 +145,34 @@ export async function GET(req) {
           )
         : 0;
 
-    // Performance distribution based on 0-10 scale converted to percentage
+    // Performance distribution
     const contentMasteryData = [
       {
-        name: "High Performance",
-        value: tests.filter((t) => (t.testScore || 0) >= 8).length, // 8+ out of 10 = 80%+
-        fill: "#22C55E",
+        name: 'High Performance',
+        value: tests.filter((t) => (t.testScore || 0) >= 8).length,
+        fill: '#22C55E',
       },
       {
-        name: "Medium Performance",
+        name: 'Medium Performance',
         value: tests.filter(
           (t) => (t.testScore || 0) >= 6 && (t.testScore || 0) < 8
-        ).length, // 6-7.9 = 60-79%
-        fill: "#EAB308",
+        ).length,
+        fill: '#EAB308',
       },
       {
-        name: "Needs Improvement",
-        value: tests.filter((t) => (t.testScore || 0) < 6).length, // <6 = <60%
-        fill: "#EF4444",
+        name: 'Needs Improvement',
+        value: tests.filter((t) => (t.testScore || 0) < 6).length,
+        fill: '#EF4444',
       },
     ];
 
     // Calculate chapter-wise performance
     const chapterWisePerformance = {};
     tests.forEach((test) => {
-      const key = `${test.chapterName || "Unknown"}`;
+      const key = `${test.chapterName || 'Unknown'}`;
       if (!chapterWisePerformance[key]) {
         chapterWisePerformance[key] = {
-          chapterName: test.chapterName || "Unknown",
+          chapterName: test.chapterName || 'Unknown',
           totalTests: 0,
           totalScore: 0,
           topics: new Set(),
@@ -194,7 +197,7 @@ export async function GET(req) {
       })
     );
 
-    // Calculate total tests and average score
+    // Calculate total tests
     const totalTests = tests.length;
 
     // Find most and least performed subjects
@@ -234,10 +237,10 @@ export async function GET(req) {
             ? subjectPerformanceData.reduce((best, current) =>
                 current.testsAttempted > best.testsAttempted ? current : best
               ).name
-            : "No tests yet",
-        bestPerformingSubject: bestSubject ? bestSubject.name : "No tests yet",
+            : 'No tests yet',
+        bestPerformingSubject: bestSubject ? bestSubject.name : 'No tests yet',
         weakestSubject:
-          worstSubject && totalTests > 0 ? worstSubject.name : "No tests yet",
+          worstSubject && totalTests > 0 ? worstSubject.name : 'No tests yet',
         averageTopicsPerSubject: Math.round(
           totalTopics / Math.max(totalSubjects, 1)
         ),
@@ -245,32 +248,33 @@ export async function GET(req) {
         testReadiness:
           totalTests > 0
             ? `${totalTests} tests completed with ${avgTestScore}% average`
-            : "Take your first test to see analytics",
+            : 'Take your first test to see analytics',
         difficultyPreference:
           difficultyData.length > 0
             ? difficultyData.reduce((max, current) =>
                 current.count > max.count ? current : max
               ).difficulty
-            : "Medium",
+            : 'Medium',
         recentPerformanceTrend:
           scoreProgressData.length >= 3
             ? scoreProgressData[scoreProgressData.length - 1].score >
               scoreProgressData[scoreProgressData.length - 3].score
-              ? "Improving"
-              : "Declining"
-            : "Not enough data",
+              ? 'Improving'
+              : 'Declining'
+            : 'Not enough data',
       },
     };
 
-    return NextResponse.json({
-      success: true,
+    return {
       data: dashboardMetrics,
-    });
+      error: null,
+    };
   } catch (error) {
-    console.error("Error fetching dashboard metrics:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch dashboard metrics" },
-      { status: 500 }
-    );
+    console.error('Error fetching dashboard metrics:', error);
+    return {
+      data: null,
+      error: 'Failed to fetch dashboard metrics',
+    };
   }
 }
+

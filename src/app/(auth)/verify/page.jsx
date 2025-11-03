@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-export default function Verify() {
+function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
@@ -350,5 +350,18 @@ export default function Verify() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function Verify() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-white"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <VerifyContent />
+    </Suspense>
   );
 }
