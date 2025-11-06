@@ -1,9 +1,9 @@
-import dbConnect from '@/lib/dbConnect';
-import ClassroomModel from '@/models/classroom.model';
-import TeacherModel from '@/models/teacher.model';
-import StudentModel from '@/models/student.model';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
+import dbConnect from "@/lib/dbConnect";
+import ClassroomModel from "@/models/classroom.model";
+import TeacherModel from "@/models/teacher.model";
+import StudentModel from "@/models/student.model";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
 /**
  * Fetcher to get classrooms based on user role (teacher or student)
@@ -18,27 +18,32 @@ export async function getClassrooms() {
     if (!user) {
       return {
         data: null,
-        error: 'Unauthorized',
+        error: "Unauthorized",
       };
     }
 
-    if (user.role === 'teacher') {
+    if (user.role === "teacher") {
       // Get teacher's classrooms
       const teacher = await TeacherModel.findOne({ userId: user.id });
       if (!teacher) {
         return {
           data: null,
-          error: 'Teacher record not found',
+          error: "Teacher record not found",
         };
       }
 
       const classrooms = await ClassroomModel.find({
         teacher: teacher._id,
       })
-        .populate('students', 'userId')
-        .populate('syllabusId', 'subjectName')
-        .select('classroomName classroomCode students syllabusId createdAt')
+        .populate("students", "userId")
+        .populate({
+          path: "subjectID",
+          select: "subjectName chapters",
+        })
+        .select("classroomName classroomCode students subjectID createdAt")
         .sort({ createdAt: -1 });
+
+      console.log("Classrooms: ", classrooms);
 
       return {
         data: classrooms.map((c) => ({
@@ -46,28 +51,33 @@ export async function getClassrooms() {
           classroomName: c.classroomName,
           classroomCode: c.classroomCode,
           studentCount: c.students?.length || 0,
-          hasSyllabus: !!c.syllabusId,
-          syllabusName: c.syllabusId?.subjectName || null,
+          subjects: Array.isArray(c.subjectID)
+            ? c.subjectID.map((s) => ({
+                id: s._id?.toString(),
+                subjectName: s.subjectName,
+                chapterCount: Array.isArray(s.chapters) ? s.chapters.length : 0,
+              }))
+            : [],
           createdAt: c.createdAt,
         })),
         error: null,
       };
-    } else if (user.role === 'student') {
+    } else if (user.role === "student") {
       // Get student's classrooms
       const student = await StudentModel.findOne({ userId: user.id });
       if (!student) {
         return {
           data: null,
-          error: 'Student record not found',
+          error: "Student record not found",
         };
       }
 
       const classrooms = await ClassroomModel.find({
         _id: { $in: student.classrooms || [] },
       })
-        .populate('teacher', 'userId')
-        .populate('syllabusId', 'subjectName')
-        .select('classroomName classroomCode teacher syllabusId createdAt')
+        .populate("teacher", "userId")
+        .populate("subjectID", "subjectName")
+        .select("classroomName classroomCode teacher subjectID createdAt")
         .sort({ createdAt: -1 });
 
       return {
@@ -84,15 +94,14 @@ export async function getClassrooms() {
     } else {
       return {
         data: null,
-        error: 'Invalid role',
+        error: "Invalid role",
       };
     }
   } catch (error) {
-    console.error('Error fetching classrooms:', error);
+    console.error("Error fetching classrooms:", error);
     return {
       data: null,
-      error: 'Failed to fetch classrooms',
+      error: "Failed to fetch classrooms",
     };
   }
 }
-

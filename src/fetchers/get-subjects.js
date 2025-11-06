@@ -1,51 +1,35 @@
-import dbConnect from '@/lib/dbConnect';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import StudentModel from '@/models/student.model';
+import dbConnect from "@/lib/dbConnect";
+import SubjectModel from "@/models/subject.model";
 
 /**
- * Fetcher to get all subjects for the current student
+ * Fetcher to get all subjects for a classroom
+ * @param {string} classroomId - The classroom id
  * @returns {Promise<{data: array | null, error: string | null}>}
  */
-export async function getSubjects() {
+export async function getSubjects(classroomId) {
   try {
     await dbConnect();
-    const session = await getServerSession(authOptions);
-
-    const user = session?.user;
-    if (!user) {
+    if (!classroomId) {
       return {
         data: null,
-        error: 'Unauthorized',
+        error: "Classroom ID is required",
       };
     }
-
-    const studentId = user.id;
-
-    // Get the full user document with populated subjects
-    const studentWithSubjects = await StudentModel.findById(studentId).populate(
-      'subjects'
-    );
-
-    if (!studentWithSubjects) {
-      return {
-        data: null,
-        error: 'Student not found',
-      };
-    }
-
-    const subjects = studentWithSubjects.subjects || [];
-
+    const subjects = await SubjectModel.find({ classroom: classroomId });
+    const mappedSubjects = subjects.map((s) => ({
+      id: s._id?.toString(),
+      subjectName: s.subjectName,
+      chapterCount: Array.isArray(s.chapters) ? s.chapters.length : 0,
+    }));
     return {
-      data: subjects,
+      data: mappedSubjects,
       error: null,
     };
   } catch (error) {
-    console.error('Error fetching subjects:', error);
+    console.error("Error fetching subjects:", error);
     return {
       data: null,
-      error: 'Failed to fetch subjects',
+      error: "Failed to fetch subjects",
     };
   }
 }
-

@@ -1,13 +1,13 @@
-'use server';
+"use server";
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import SubjectModel from '@/models/subject.model';
-import ClassroomModel from '@/models/classroom.model';
-import TeacherModel from '@/models/teacher.model';
-import dbConnect from '@/lib/dbConnect';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import { revalidatePath } from 'next/cache';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import SubjectModel from "@/models/subject.model";
+import ClassroomModel from "@/models/classroom.model";
+import TeacherModel from "@/models/teacher.model";
+import dbConnect from "@/lib/dbConnect";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { revalidatePath } from "next/cache";
 
 /**
  * Server action to upload syllabus to a classroom
@@ -21,10 +21,10 @@ export async function uploadClassroomSyllabus(formData) {
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
-    if (!user || user.role !== 'teacher') {
+    if (!user || user.role !== "teacher") {
       return {
         data: null,
-        error: 'Unauthorized. Teacher access required.',
+        error: "Unauthorized. Teacher access required.",
       };
     }
 
@@ -33,25 +33,25 @@ export async function uploadClassroomSyllabus(formData) {
     if (!teacher) {
       return {
         data: null,
-        error: 'Teacher record not found',
+        error: "Teacher record not found",
       };
     }
 
-    const file = formData.get('pdf');
-    const subjectName = formData.get('subjectName');
-    const classroomId = formData.get('classroomId');
+    const file = formData.get("pdf");
+    const subjectName = formData.get("subjectName");
+    const classroomId = formData.get("classroomId");
 
-    if (!subjectName || subjectName.trim() === '') {
+    if (!subjectName || subjectName.trim() === "") {
       return {
         data: null,
-        error: 'Subject name is required',
+        error: "Subject name is required",
       };
     }
 
     if (!classroomId) {
       return {
         data: null,
-        error: 'Classroom ID is required',
+        error: "Classroom ID is required",
       };
     }
 
@@ -64,14 +64,14 @@ export async function uploadClassroomSyllabus(formData) {
     if (!classroom) {
       return {
         data: null,
-        error: 'Classroom not found or you don\'t have access to it',
+        error: "Classroom not found or you don't have access to it",
       };
     }
 
     if (!file) {
       return {
         data: null,
-        error: 'No file uploaded',
+        error: "No file uploaded",
       };
     }
 
@@ -81,14 +81,14 @@ export async function uploadClassroomSyllabus(formData) {
 
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Process PDF with Gemini
     const result = await model.generateContent([
       {
         inlineData: {
-          data: pdfBuffer.toString('base64'),
-          mimeType: 'application/pdf',
+          data: pdfBuffer.toString("base64"),
+          mimeType: "application/pdf",
         },
       },
       {
@@ -113,8 +113,11 @@ Return ONLY valid JSON, no markdown, no code blocks, just the JSON object.`,
     let text = response.text().trim();
 
     // Clean the response - remove markdown code blocks if present
-    if (text.startsWith('```')) {
-      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    if (text.startsWith("```")) {
+      text = text
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
     }
 
     // Parse the JSON response
@@ -127,8 +130,8 @@ Return ONLY valid JSON, no markdown, no code blocks, just the JSON object.`,
         .map((topic) =>
           topic
             .trim()
-            .replace(/^\d+\.\s*/, '') // Remove leading numbers
-            .replace(/^[-•]\s*/, '') // Remove leading bullets
+            .replace(/^\d+\.\s*/, "") // Remove leading numbers
+            .replace(/^[-•]\s*/, "") // Remove leading bullets
             .trim()
         )
         .filter((topic) => topic.length > 0), // Remove empty topics
@@ -149,21 +152,20 @@ Return ONLY valid JSON, no markdown, no code blocks, just the JSON object.`,
     );
 
     // Revalidate classroom pages
-    revalidatePath(`/teacher/classroom/${classroomId}`);
+    revalidatePath(`/classroom/${classroomId}`);
 
     return {
       data: {
         subject: syllabusData,
-        message: 'Syllabus uploaded successfully to classroom',
+        message: "Syllabus uploaded successfully to classroom",
       },
       error: null,
     };
   } catch (error) {
-    console.error('Error processing syllabus:', error);
+    console.error("Error processing syllabus:", error);
     return {
       data: null,
-      error: 'Failed to process syllabus',
+      error: "Failed to process syllabus",
     };
   }
 }
-

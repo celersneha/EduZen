@@ -1,13 +1,13 @@
-'use server';
+"use server";
 
-import dbConnect from '@/lib/dbConnect';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import VideoLectureModel from '@/models/video-lecture.model';
-import TeacherModel from '@/models/teacher.model';
-import ClassroomModel from '@/models/classroom.model';
-import { uploadVideoToCloudinary } from '@/lib/cloudinary';
-import { revalidatePath } from 'next/cache';
+import dbConnect from "@/lib/dbConnect";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import VideoLectureModel from "@/models/video-lecture.model";
+import TeacherModel from "@/models/teacher.model";
+import ClassroomModel from "@/models/classroom.model";
+import { uploadVideoToCloudinary } from "@/lib/cloudinary";
+import { revalidatePath } from "next/cache";
 
 /**
  * Server action to upload a video lecture to Cloudinary
@@ -19,33 +19,33 @@ export async function uploadVideoLecture(formData) {
     await dbConnect();
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || session.user.role !== 'teacher') {
+    if (!session?.user || session.user.role !== "teacher") {
       return {
         data: null,
-        error: 'Unauthorized - Only teachers can upload video lectures',
+        error: "Unauthorized - Only teachers can upload video lectures",
       };
     }
 
-    const file = formData.get('video');
-    const title = formData.get('title');
-    const description = formData.get('description') || '';
-    const classroomId = formData.get('classroomId');
-    const chapter = formData.get('chapter') || '';
-    const topic = formData.get('topic') || '';
+    const file = formData.get("video");
+    const title = formData.get("title");
+    const description = formData.get("description") || "";
+    const classroomId = formData.get("classroomId");
+    const chapter = formData.get("chapter") || "";
+    const topic = formData.get("topic") || "";
 
     // Validate required fields
     if (!file || !title || !classroomId) {
       return {
         data: null,
-        error: 'Video file, title, and classroom ID are required',
+        error: "Video file, title, and classroom ID are required",
       };
     }
 
     // Validate file type
-    if (!file.type.startsWith('video/')) {
+    if (!file.type.startsWith("video/")) {
       return {
         data: null,
-        error: 'Invalid file type. Only video files are allowed.',
+        error: "Invalid file type. Only video files are allowed.",
       };
     }
 
@@ -54,7 +54,7 @@ export async function uploadVideoLecture(formData) {
     if (file.size > maxSize) {
       return {
         data: null,
-        error: 'File size exceeds 500MB limit',
+        error: "File size exceeds 500MB limit",
       };
     }
 
@@ -63,7 +63,7 @@ export async function uploadVideoLecture(formData) {
     if (!teacher) {
       return {
         data: null,
-        error: 'Teacher record not found',
+        error: "Teacher record not found",
       };
     }
 
@@ -75,7 +75,7 @@ export async function uploadVideoLecture(formData) {
     if (!classroom) {
       return {
         data: null,
-        error: 'Classroom not found or access denied',
+        error: "Classroom not found or access denied",
       };
     }
 
@@ -88,9 +88,9 @@ export async function uploadVideoLecture(formData) {
     const sanitizedTitle = title
       .trim()
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    const fileExtension = file.name.split('.').pop();
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const fileExtension = file.name.split(".").pop();
     const fileName = `${sanitizedTitle}-${timestamp}.${fileExtension}`;
 
     // Upload to Cloudinary
@@ -119,8 +119,8 @@ export async function uploadVideoLecture(formData) {
     await videoLecture.save();
 
     // Revalidate classroom pages
-    revalidatePath(`/teacher/classroom/${classroomId}`);
-    revalidatePath(`/student/classroom/${classroomId}`);
+    revalidatePath(`/classroom/${classroomId}`);
+    revalidatePath(`/classroom/${classroomId}`);
 
     return {
       data: {
@@ -137,11 +137,10 @@ export async function uploadVideoLecture(formData) {
       error: null,
     };
   } catch (error) {
-    console.error('Error uploading video lecture:', error);
+    console.error("Error uploading video lecture:", error);
     return {
       data: null,
-      error: error.message || 'Failed to upload video lecture',
+      error: error.message || "Failed to upload video lecture",
     };
   }
 }
-

@@ -1,12 +1,12 @@
-'use server';
+"use server";
 
-import dbConnect from '@/lib/dbConnect';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import AnnouncementModel from '@/models/announcement.model';
-import TeacherModel from '@/models/teacher.model';
-import ClassroomModel from '@/models/classroom.model';
-import { revalidatePath } from 'next/cache';
+import dbConnect from "@/lib/dbConnect";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import AnnouncementModel from "@/models/announcement.model";
+import TeacherModel from "@/models/teacher.model";
+import ClassroomModel from "@/models/classroom.model";
+import { revalidatePath } from "next/cache";
 
 /**
  * Server action to create an announcement for a classroom
@@ -22,10 +22,10 @@ export async function createAnnouncement(announcementData) {
     await dbConnect();
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || session.user.role !== 'teacher') {
+    if (!session?.user || session.user.role !== "teacher") {
       return {
         data: null,
-        error: 'Unauthorized - Only teachers can create announcements',
+        error: "Unauthorized - Only teachers can create announcements",
       };
     }
 
@@ -34,7 +34,7 @@ export async function createAnnouncement(announcementData) {
     if (!classroomId || !title || !content) {
       return {
         data: null,
-        error: 'Classroom ID, title, and content are required',
+        error: "Classroom ID, title, and content are required",
       };
     }
 
@@ -43,7 +43,7 @@ export async function createAnnouncement(announcementData) {
     if (!teacher) {
       return {
         data: null,
-        error: 'Teacher record not found',
+        error: "Teacher record not found",
       };
     }
 
@@ -55,7 +55,7 @@ export async function createAnnouncement(announcementData) {
     if (!classroom) {
       return {
         data: null,
-        error: 'Classroom not found or access denied',
+        error: "Classroom not found or access denied",
       };
     }
 
@@ -71,15 +71,15 @@ export async function createAnnouncement(announcementData) {
     await announcement.save();
 
     // Populate teacher info for response
-    await announcement.populate('teacher', 'userId');
+    await announcement.populate("teacher", "userId");
     await announcement.populate({
-      path: 'teacher',
-      populate: { path: 'userId', select: 'name' },
+      path: "teacher",
+      populate: { path: "userId", select: "name" },
     });
 
     // Revalidate classroom pages
-    revalidatePath(`/teacher/classroom/${classroomId}`);
-    revalidatePath(`/student/classroom/${classroomId}`);
+    revalidatePath(`/classroom/${classroomId}`);
+    revalidatePath(`/classroom/${classroomId}`);
 
     return {
       data: {
@@ -88,17 +88,15 @@ export async function createAnnouncement(announcementData) {
         content: announcement.content,
         isPinned: announcement.isPinned,
         createdAt: announcement.createdAt,
-        teacherName:
-          announcement.teacher?.userId?.name || 'Teacher',
+        teacherName: announcement.teacher?.userId?.name || "Teacher",
       },
       error: null,
     };
   } catch (error) {
-    console.error('Error creating announcement:', error);
+    console.error("Error creating announcement:", error);
     return {
       data: null,
-      error: 'Failed to create announcement',
+      error: "Failed to create announcement",
     };
   }
 }
-

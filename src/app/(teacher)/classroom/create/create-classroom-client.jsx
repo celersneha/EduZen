@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { toast } from 'sonner';
-import Link from 'next/link';
-import { ArrowLeft, Loader2, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+import Link from "next/link";
+import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -16,23 +16,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { createClassroom } from '@/actions/create-classroom';
-import { generateClassroomCode } from '@/actions/generate-classroom-code';
+} from "@/components/ui/card";
+import { createClassroom } from "@/actions/create-classroom";
+import { generateClassroomCode } from "@/actions/generate-classroom-code";
 
 const formSchema = z.object({
   classroomName: z
     .string()
-    .min(3, 'Classroom name must be at least 3 characters'),
-  classroomCode: z.string().min(4, 'Classroom code must be at least 4 characters'),
+    .min(3, "Classroom name must be at least 3 characters"),
+  classroomCode: z
+    .string()
+    .min(4, "Classroom code must be at least 4 characters"),
 });
 
 export function CreateClassroomClient() {
@@ -43,8 +45,8 @@ export function CreateClassroomClient() {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      classroomName: '',
-      classroomCode: '',
+      classroomName: "",
+      classroomCode: "",
     },
   });
 
@@ -58,11 +60,11 @@ export function CreateClassroomClient() {
         return;
       }
 
-      form.setValue('classroomCode', data);
-      toast.success('Classroom code generated!');
+      form.setValue("classroomCode", data);
+      toast.success("Classroom code generated!");
     } catch (error) {
-      console.error('Error generating code:', error);
-      toast.error('Failed to generate code');
+      console.error("Error generating code:", error);
+      toast.error("Failed to generate code");
     } finally {
       setIsGenerating(false);
     }
@@ -78,18 +80,18 @@ export function CreateClassroomClient() {
         return;
       }
 
-      toast.success('Classroom created successfully!');
-      router.push(`/teacher/classroom/${data.classroom.id}`);
+      toast.success("Classroom created successfully!");
+      router.push(`/classroom/${data.classroom.id}`);
     } catch (error) {
-      console.error('Error creating classroom:', error);
-      toast.error('Failed to create classroom');
+      console.error("Error creating classroom:", error);
+      toast.error("Failed to create classroom");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-r from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <Link href="/teacher/dashboard">
           <Button variant="ghost" className="mb-6">
@@ -162,7 +164,7 @@ export function CreateClassroomClient() {
                           {isGenerating ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
-                            'Generate'
+                            "Generate"
                           )}
                         </Button>
                       </div>
@@ -195,7 +197,7 @@ export function CreateClassroomClient() {
                         Creating...
                       </>
                     ) : (
-                      'Create Classroom'
+                      "Create Classroom"
                     )}
                   </Button>
                 </div>
@@ -207,4 +209,3 @@ export function CreateClassroomClient() {
     </div>
   );
 }
-

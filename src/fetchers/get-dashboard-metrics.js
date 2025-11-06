@@ -1,9 +1,9 @@
-import dbConnect from '@/lib/dbConnect';
-import SubjectModel from '@/models/subject.model';
-import StudentModel from '@/models/student.model';
-import TestModel from '@/models/test.model';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
+import dbConnect from "@/lib/dbConnect";
+import SubjectModel from "@/models/subject.model";
+import StudentModel from "@/models/student.model";
+import TestModel from "@/models/test.model";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
 /**
  * Fetcher to get dashboard metrics for a student
@@ -18,19 +18,25 @@ export async function getDashboardMetrics() {
     if (!user) {
       return {
         data: null,
-        error: 'Unauthorized',
+        error: "Unauthorized",
       };
     }
+
+    console.log("Fetching dashboard metrics for user:", user);
 
     const studentId = user.id;
 
     // Get student with populated subjects
-    const student = await StudentModel.findById(studentId).populate('subjects');
+    const student = await StudentModel.findOne({ userId: studentId }).populate(
+      "subjects"
+    );
+
+    console.log("Fetched student data:", student);
 
     if (!student) {
       return {
         data: null,
-        error: 'Student not found',
+        error: "Student not found",
       };
     }
 
@@ -85,7 +91,7 @@ export async function getDashboardMetrics() {
         : 0;
 
       return {
-        name: subject.subjectName || 'Unknown Subject',
+        name: subject.subjectName || "Unknown Subject",
         chaptersCount,
         topicsCount,
         avgScore,
@@ -95,7 +101,7 @@ export async function getDashboardMetrics() {
 
     // Difficulty level distribution from tests
     const difficultyDistribution = tests.reduce((acc, test) => {
-      const difficulty = test.difficultyLevel || 'medium';
+      const difficulty = test.difficultyLevel || "medium";
       acc[difficulty] = (acc[difficulty] || 0) + 1;
       return acc;
     }, {});
@@ -105,14 +111,14 @@ export async function getDashboardMetrics() {
         difficulty: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
         count,
         avgScore:
-          tests.filter((t) => (t.difficultyLevel || 'medium') === difficulty)
+          tests.filter((t) => (t.difficultyLevel || "medium") === difficulty)
             .length > 0
             ? Math.round(
                 (tests
-                  .filter((t) => (t.difficultyLevel || 'medium') === difficulty)
+                  .filter((t) => (t.difficultyLevel || "medium") === difficulty)
                   .reduce((sum, test) => sum + (test.testScore || 0), 0) /
                   tests.filter(
-                    (t) => (t.difficultyLevel || 'medium') === difficulty
+                    (t) => (t.difficultyLevel || "medium") === difficulty
                   ).length) *
                   10
               )
@@ -124,15 +130,15 @@ export async function getDashboardMetrics() {
     const scoreProgressData = tests.map((test, index) => ({
       testNumber: index + 1,
       score: (test.testScore || 0) * 10, // Convert 0-10 to 0-100 for display
-      date: new Date(test.createdAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
+      date: new Date(test.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
       }),
       subject:
         subjects.find((s) => s._id.toString() === test.subject.toString())
-          ?.subjectName || 'Unknown',
-      chapter: test.chapterName || 'Unknown Chapter',
-      topic: test.topicName || 'Unknown Topic',
+          ?.subjectName || "Unknown",
+      chapter: test.chapterName || "Unknown Chapter",
+      topic: test.topicName || "Unknown Topic",
     }));
 
     // Content mastery based on test performance
@@ -148,31 +154,31 @@ export async function getDashboardMetrics() {
     // Performance distribution
     const contentMasteryData = [
       {
-        name: 'High Performance',
+        name: "High Performance",
         value: tests.filter((t) => (t.testScore || 0) >= 8).length,
-        fill: '#22C55E',
+        fill: "#22C55E",
       },
       {
-        name: 'Medium Performance',
+        name: "Medium Performance",
         value: tests.filter(
           (t) => (t.testScore || 0) >= 6 && (t.testScore || 0) < 8
         ).length,
-        fill: '#EAB308',
+        fill: "#EAB308",
       },
       {
-        name: 'Needs Improvement',
+        name: "Needs Improvement",
         value: tests.filter((t) => (t.testScore || 0) < 6).length,
-        fill: '#EF4444',
+        fill: "#EF4444",
       },
     ];
 
     // Calculate chapter-wise performance
     const chapterWisePerformance = {};
     tests.forEach((test) => {
-      const key = `${test.chapterName || 'Unknown'}`;
+      const key = `${test.chapterName || "Unknown"}`;
       if (!chapterWisePerformance[key]) {
         chapterWisePerformance[key] = {
-          chapterName: test.chapterName || 'Unknown',
+          chapterName: test.chapterName || "Unknown",
           totalTests: 0,
           totalScore: 0,
           topics: new Set(),
@@ -237,10 +243,10 @@ export async function getDashboardMetrics() {
             ? subjectPerformanceData.reduce((best, current) =>
                 current.testsAttempted > best.testsAttempted ? current : best
               ).name
-            : 'No tests yet',
-        bestPerformingSubject: bestSubject ? bestSubject.name : 'No tests yet',
+            : "No tests yet",
+        bestPerformingSubject: bestSubject ? bestSubject.name : "No tests yet",
         weakestSubject:
-          worstSubject && totalTests > 0 ? worstSubject.name : 'No tests yet',
+          worstSubject && totalTests > 0 ? worstSubject.name : "No tests yet",
         averageTopicsPerSubject: Math.round(
           totalTopics / Math.max(totalSubjects, 1)
         ),
@@ -248,20 +254,20 @@ export async function getDashboardMetrics() {
         testReadiness:
           totalTests > 0
             ? `${totalTests} tests completed with ${avgTestScore}% average`
-            : 'Take your first test to see analytics',
+            : "Take your first test to see analytics",
         difficultyPreference:
           difficultyData.length > 0
             ? difficultyData.reduce((max, current) =>
                 current.count > max.count ? current : max
               ).difficulty
-            : 'Medium',
+            : "Medium",
         recentPerformanceTrend:
           scoreProgressData.length >= 3
             ? scoreProgressData[scoreProgressData.length - 1].score >
               scoreProgressData[scoreProgressData.length - 3].score
-              ? 'Improving'
-              : 'Declining'
-            : 'Not enough data',
+              ? "Improving"
+              : "Declining"
+            : "Not enough data",
       },
     };
 
@@ -270,11 +276,10 @@ export async function getDashboardMetrics() {
       error: null,
     };
   } catch (error) {
-    console.error('Error fetching dashboard metrics:', error);
+    console.error("Error fetching dashboard metrics:", error);
     return {
       data: null,
-      error: 'Failed to fetch dashboard metrics',
+      error: "Failed to fetch dashboard metrics",
     };
   }
 }
-

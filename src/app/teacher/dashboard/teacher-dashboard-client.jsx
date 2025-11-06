@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import Link from "next/link";
 import {
   BookOpen,
   Users,
@@ -8,16 +8,16 @@ import {
   FileText,
   ArrowRight,
   GraduationCap,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export function TeacherDashboardClient({ classrooms, error, userName }) {
   if (error) {
@@ -63,7 +63,9 @@ export function TeacherDashboardClient({ classrooms, error, userName }) {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Students
+              </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -78,7 +80,9 @@ export function TeacherDashboardClient({ classrooms, error, userName }) {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Syllabus Uploaded</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Syllabus Uploaded
+              </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -104,7 +108,7 @@ export function TeacherDashboardClient({ classrooms, error, userName }) {
                   Start by creating a classroom and inviting your students
                 </p>
               </div>
-              <Link href="/teacher/classroom/create">
+              <Link href="/classroom/create">
                 <Button
                   variant="secondary"
                   size="lg"
@@ -121,8 +125,8 @@ export function TeacherDashboardClient({ classrooms, error, userName }) {
         {/* Classrooms List */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">My Classrooms</h2>
-          <Link href="/teacher/classroom/create">
-            <Button>
+          <Link href="/classroom/create">
+            <Button variant="gradient">
               <Plus className="mr-2 h-4 w-4" />
               New Classroom
             </Button>
@@ -140,8 +144,8 @@ export function TeacherDashboardClient({ classrooms, error, userName }) {
                 <p className="text-gray-600 mb-6">
                   Create your first classroom to start managing your students
                 </p>
-                <Link href="/teacher/classroom/create">
-                  <Button>
+                <Link href="/classroom/create">
+                  <Button variant="gradient">
                     <Plus className="mr-2 h-4 w-4" />
                     Create Your First Classroom
                   </Button>
@@ -195,13 +199,16 @@ export function TeacherDashboardClient({ classrooms, error, userName }) {
                           {classroom.syllabusName}
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-gray-50 text-gray-500">
+                        <Badge
+                          variant="outline"
+                          className="bg-gray-50 text-gray-500"
+                        >
                           Not uploaded
                         </Badge>
                       )}
                     </div>
 
-                    <Link href={`/teacher/classroom/${classroom.id}`}>
+                    <Link href={`/classroom/${classroom.id}`}>
                       <Button className="w-full" variant="outline">
                         Manage Classroom
                         <ArrowRight className="ml-2 h-4 w-4" />
@@ -217,4 +224,3 @@ export function TeacherDashboardClient({ classrooms, error, userName }) {
     </div>
   );
 }
-

@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
   Plus,
@@ -21,8 +21,8 @@ import {
   Brain,
   CheckCircle,
   Target,
-} from 'lucide-react';
-import Link from 'next/link';
+} from "lucide-react";
+import Link from "next/link";
 
 export function ShowSubjectsClient({ subjects, error }) {
   const router = useRouter();
@@ -32,7 +32,7 @@ export function ShowSubjectsClient({ subjects, error }) {
   };
 
   const handleAddSubjectClick = () => {
-    router.push('/add-subject');
+    router.push("/add-subject");
   };
 
   if (error) {
@@ -62,7 +62,7 @@ export function ShowSubjectsClient({ subjects, error }) {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Your Learning{' '}
+            Your Learning{" "}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
               Subjects
             </span>
@@ -78,7 +78,7 @@ export function ShowSubjectsClient({ subjects, error }) {
               <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm">
                 <BookOpen className="h-4 w-4 text-blue-500" />
                 <span className="text-sm font-medium">
-                  {subjects.length} Subject{subjects.length !== 1 ? 's' : ''}
+                  {subjects.length} Subject{subjects.length !== 1 ? "s" : ""}
                 </span>
               </div>
               <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm">
@@ -94,7 +94,6 @@ export function ShowSubjectsClient({ subjects, error }) {
         </motion.div>
 
         {subjects.length === 0 ? (
-          // Empty State with Modern Design
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -106,75 +105,12 @@ export function ShowSubjectsClient({ subjects, error }) {
                   <BookOpen className="h-10 w-10 text-white" />
                 </div>
                 <CardTitle className="text-3xl font-bold mb-2">
-                  Welcome to EduZen!
+                  No subjects yet
                 </CardTitle>
                 <p className="text-blue-100 text-lg">
-                  You haven't added any subjects yet
+                  You haven't been assigned any subjects yet.
                 </p>
               </CardHeader>
-
-              <CardContent className="p-12">
-                <div className="space-y-6">
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                    Ready to start your learning journey?
-                  </h3>
-                  <p className="text-gray-600 text-lg leading-relaxed">
-                    Upload your first syllabus and let our AI organize it into
-                    structured chapters and topics. You'll be ready to take
-                    tests and track your progress in minutes!
-                  </p>
-
-                  {/* Feature highlights */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <FileText className="h-8 w-8 text-blue-600" />
-                      </div>
-                      <h4 className="font-semibold text-gray-900 mb-2">
-                        Upload PDF
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Simply upload your syllabus PDF file
-                      </p>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Brain className="h-8 w-8 text-purple-600" />
-                      </div>
-                      <h4 className="font-semibold text-gray-900 mb-2">
-                        AI Processing
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Our AI extracts and organizes content
-                      </p>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Target className="h-8 w-8 text-green-600" />
-                      </div>
-                      <h4 className="font-semibold text-gray-900 mb-2">
-                        Start Learning
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Take tests and track your progress
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-
-              <CardFooter className="p-8">
-                <Button
-                  onClick={handleAddSubjectClick}
-                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <Plus className="mr-3 h-5 w-5" />
-                  Add Your First Subject
-                  <ArrowRight className="ml-3 h-5 w-5" />
-                </Button>
-              </CardFooter>
             </Card>
           </motion.div>
         ) : (
@@ -232,7 +168,7 @@ export function ShowSubjectsClient({ subjects, error }) {
                         <p className="text-white/80 text-sm line-clamp-2">
                           {subject.syllabusDescription ||
                             subject.description ||
-                            'AI-organized syllabus ready for learning'}
+                            "AI-organized syllabus ready for learning"}
                         </p>
                       </div>
                     </CardHeader>
@@ -317,4 +253,3 @@ export function ShowSubjectsClient({ subjects, error }) {
     </div>
   );
 }
-

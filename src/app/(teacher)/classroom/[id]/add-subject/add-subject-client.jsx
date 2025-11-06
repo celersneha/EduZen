@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
@@ -16,25 +16,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Upload,
-  FileText,
-  BookOpen,
-  CheckCircle,
-  Loader2,
-} from 'lucide-react';
-import { addSubject } from '@/actions/add-subject';
+} from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Upload, FileText, BookOpen, CheckCircle, Loader2 } from "lucide-react";
+import { addSubject } from "@/actions/add-subject";
 
 const formSchema = z.object({
-  subjectName: z.string().min(3, 'Subject name must be at least 3 characters'),
-  pdf: z.any().refine((file) => file instanceof File, 'Please upload a PDF file'),
+  subjectName: z.string().min(3, "Subject name must be at least 3 characters"),
+  pdf: z
+    .any()
+    .refine((file) => file instanceof File, "Please upload a PDF file"),
 });
 
 export function AddSubjectClient() {
@@ -43,17 +34,31 @@ export function AddSubjectClient() {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      subjectName: '',
+      subjectName: "",
       pdf: undefined,
     },
   });
+
+  // Extract classroomId from the current path
+  let classroomId = null;
+  if (typeof window !== "undefined") {
+    const match = window.location.pathname.match(
+      /classroom\/(.*?)\/add-subject/
+    );
+    if (match && match[1]) {
+      classroomId = match[1];
+    }
+  }
 
   const handleSubmit = async (values) => {
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append('pdf', values.pdf);
-      formData.append('subjectName', values.subjectName.trim());
+      formData.append("pdf", values.pdf);
+      formData.append("subjectName", values.subjectName.trim());
+      if (classroomId) {
+        formData.append("classroomId", classroomId);
+      }
 
       const { data, error } = await addSubject(formData);
 
@@ -62,12 +67,12 @@ export function AddSubjectClient() {
         return;
       }
 
-      toast.success('Syllabus uploaded successfully!');
+      toast.success("Syllabus uploaded successfully!");
       form.reset();
-      router.push('/show-subjects');
+      router.push("/show-subjects");
     } catch (err) {
-      console.error('Error uploading syllabus:', err);
-      toast.error(err.message || 'Failed to upload syllabus');
+      console.error("Error uploading syllabus:", err);
+      toast.error(err.message || "Failed to upload syllabus");
     } finally {
       setIsSubmitting(false);
     }
@@ -81,7 +86,7 @@ export function AddSubjectClient() {
       <div className="container mx-auto px-4 py-16 max-w-6xl relative z-10">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Add Your{' '}
+            Add Your{" "}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
               Subject
             </span>
@@ -146,7 +151,9 @@ export function AddSubjectClient() {
                     <FormField
                       control={form.control}
                       name="pdf"
-                      render={({ field: { value, onChange, ...fieldProps } }) => (
+                      render={({
+                        field: { value, onChange, ...fieldProps },
+                      }) => (
                         <FormItem>
                           <FormLabel>Syllabus PDF</FormLabel>
                           <FormControl>
@@ -157,8 +164,8 @@ export function AddSubjectClient() {
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
-                                  if (file.type !== 'application/pdf') {
-                                    toast.error('Please upload a PDF file');
+                                  if (file.type !== "application/pdf") {
+                                    toast.error("Please upload a PDF file");
                                     return;
                                   }
                                   onChange(file);
@@ -203,7 +210,7 @@ export function AddSubjectClient() {
               </CardHeader>
               <CardContent className="p-8 space-y-6">
                 <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
                     <FileText className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
@@ -217,7 +224,7 @@ export function AddSubjectClient() {
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
                     <Upload className="h-6 w-6 text-purple-600" />
                   </div>
                   <div>
@@ -231,7 +238,7 @@ export function AddSubjectClient() {
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center shrink-0">
                     <CheckCircle className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
@@ -274,4 +281,3 @@ export function AddSubjectClient() {
     </div>
   );
 }
-

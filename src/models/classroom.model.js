@@ -12,11 +12,12 @@ const classroomSchema = new Schema(
       ref: "Teacher",
       required: true,
     },
-    syllabusId: {
-      type: Schema.Types.ObjectId,
-      ref: "Subject",
-      default: null,
-    },
+    subjectID: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Subject",
+      },
+    ],
     classroomCode: {
       type: String,
       required: true,
@@ -39,4 +40,3 @@ const ClassroomModel =
   mongoose.models.Classroom || mongoose.model("Classroom", classroomSchema);
 
 export default ClassroomModel;
-

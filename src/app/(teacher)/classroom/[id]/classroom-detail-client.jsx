@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import Link from 'next/link';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import Link from "next/link";
 import {
   ArrowLeft,
   Users,
@@ -13,102 +13,69 @@ import {
   Copy,
   CheckCircle,
   Loader2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { inviteStudents } from '@/actions/invite-students';
-import { uploadClassroomSyllabus } from '@/actions/upload-classroom-syllabus';
-import { createAnnouncement } from '@/actions/create-announcement';
-import { uploadVideoLecture } from '@/actions/upload-video-lecture';
-import { Megaphone, Pin, Send, Video, Upload as UploadIcon, Play, Clock } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { inviteStudents } from "@/actions/invite-students";
+import { uploadClassroomSyllabus } from "@/actions/upload-classroom-syllabus";
+import { createAnnouncement } from "@/actions/create-announcement";
+import { uploadVideoLecture } from "@/actions/upload-video-lecture";
+import {
+  Megaphone,
+  Pin,
+  Send,
+  Video,
+  Upload as UploadIcon,
+  Play,
+  Clock,
+} from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
-export function ClassroomDetailClient({ classroom, announcements = [], videoLectures = [] }) {
+export function ClassroomDetailClient({
+  classroom,
+  announcements = [],
+  videoLectures = [],
+}) {
   const router = useRouter();
-  const [file, setFile] = useState(null);
-  const [subjectName, setSubjectName] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-  const [inviteEmails, setInviteEmails] = useState('');
+  const [inviteEmails, setInviteEmails] = useState("");
   const [isInviting, setIsInviting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
-  const [announcementTitle, setAnnouncementTitle] = useState('');
-  const [announcementContent, setAnnouncementContent] = useState('');
+  const [announcementTitle, setAnnouncementTitle] = useState("");
+  const [announcementContent, setAnnouncementContent] = useState("");
   const [isPinned, setIsPinned] = useState(false);
   const [isPostingAnnouncement, setIsPostingAnnouncement] = useState(false);
   const [showVideoUploadForm, setShowVideoUploadForm] = useState(false);
   const [videoFile, setVideoFile] = useState(null);
-  const [videoTitle, setVideoTitle] = useState('');
-  const [videoDescription, setVideoDescription] = useState('');
-  const [videoChapter, setVideoChapter] = useState('');
-  const [videoTopic, setVideoTopic] = useState('');
+  const [videoTitle, setVideoTitle] = useState("");
+  const [videoDescription, setVideoDescription] = useState("");
+  const [videoChapter, setVideoChapter] = useState("");
+  const [videoTopic, setVideoTopic] = useState("");
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.type === 'application/pdf') {
-      setFile(selectedFile);
-    } else {
-      toast.error('Please select a PDF file');
-    }
-  };
-
-  const handleSyllabusUpload = async (e) => {
-    e.preventDefault();
-    if (!file || !subjectName.trim()) {
-      toast.error('Please select a PDF file and enter a subject name');
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('pdf', file);
-      formData.append('subjectName', subjectName.trim());
-      formData.append('classroomId', classroom.id);
-
-      const { data, error } = await uploadClassroomSyllabus(formData);
-
-      if (error) {
-        toast.error(error);
-        return;
-      }
-
-      toast.success('Syllabus uploaded successfully!');
-      setFile(null);
-      setSubjectName('');
-      router.refresh();
-    } catch (error) {
-      console.error('Error uploading syllabus:', error);
-      toast.error('Failed to upload syllabus');
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleInvite = async () => {
     if (!inviteEmails.trim()) {
-      toast.error('Please enter at least one email address');
+      toast.error("Please enter at least one email address");
       return;
     }
 
     const emails = inviteEmails
-      .split(',')
+      .split(",")
       .map((email) => email.trim())
       .filter((email) => email.length > 0);
 
     if (emails.length === 0) {
-      toast.error('Please enter valid email addresses');
+      toast.error("Please enter valid email addresses");
       return;
     }
 
@@ -123,10 +90,10 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
 
       const successCount = data.results.filter((r) => r.success).length;
       toast.success(`Invitations sent to ${successCount} student(s)`);
-      setInviteEmails('');
+      setInviteEmails("");
     } catch (error) {
-      console.error('Error sending invitations:', error);
-      toast.error('Failed to send invitations');
+      console.error("Error sending invitations:", error);
+      toast.error("Failed to send invitations");
     } finally {
       setIsInviting(false);
     }
@@ -137,14 +104,14 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
     const joinLink = `${baseUrl}/classroom/join?code=${classroom.classroomCode}`;
     navigator.clipboard.writeText(joinLink);
     setCopied(true);
-    toast.success('Join link copied to clipboard!');
+    toast.success("Join link copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handlePostAnnouncement = async (e) => {
     e.preventDefault();
     if (!announcementTitle.trim() || !announcementContent.trim()) {
-      toast.error('Please fill in both title and content');
+      toast.error("Please fill in both title and content");
       return;
     }
 
@@ -162,15 +129,15 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
         return;
       }
 
-      toast.success('Announcement posted successfully!');
-      setAnnouncementTitle('');
-      setAnnouncementContent('');
+      toast.success("Announcement posted successfully!");
+      setAnnouncementTitle("");
+      setAnnouncementContent("");
       setIsPinned(false);
       setShowAnnouncementForm(false);
       router.refresh();
     } catch (error) {
-      console.error('Error posting announcement:', error);
-      toast.error('Failed to post announcement');
+      console.error("Error posting announcement:", error);
+      toast.error("Failed to post announcement");
     } finally {
       setIsPostingAnnouncement(false);
     }
@@ -178,41 +145,41 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const handleVideoFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      if (selectedFile.type.startsWith('video/')) {
+      if (selectedFile.type.startsWith("video/")) {
         // Validate file size (500MB max)
         const maxSize = 500 * 1024 * 1024;
         if (selectedFile.size > maxSize) {
-          toast.error('Video file size exceeds 500MB limit');
+          toast.error("Video file size exceeds 500MB limit");
           return;
         }
         setVideoFile(selectedFile);
       } else {
-        toast.error('Please select a video file');
+        toast.error("Please select a video file");
       }
     }
   };
 
   const formatDuration = (seconds) => {
-    if (!seconds) return '0:00';
+    if (!seconds) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const formatFileSize = (bytes) => {
-    if (!bytes) return '0 B';
+    if (!bytes) return "0 B";
     const mb = bytes / (1024 * 1024);
     if (mb >= 1) {
       return `${mb.toFixed(2)} MB`;
@@ -224,19 +191,19 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
   const handleVideoUpload = async (e) => {
     e.preventDefault();
     if (!videoFile || !videoTitle.trim()) {
-      toast.error('Please select a video file and enter a title');
+      toast.error("Please select a video file and enter a title");
       return;
     }
 
     setIsUploadingVideo(true);
     try {
       const formData = new FormData();
-      formData.append('video', videoFile);
-      formData.append('title', videoTitle.trim());
-      formData.append('description', videoDescription.trim());
-      formData.append('classroomId', classroom.id);
-      formData.append('chapter', videoChapter.trim());
-      formData.append('topic', videoTopic.trim());
+      formData.append("video", videoFile);
+      formData.append("title", videoTitle.trim());
+      formData.append("description", videoDescription.trim());
+      formData.append("classroomId", classroom.id);
+      formData.append("chapter", videoChapter.trim());
+      formData.append("topic", videoTopic.trim());
 
       const { data, error } = await uploadVideoLecture(formData);
 
@@ -245,17 +212,17 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
         return;
       }
 
-      toast.success('Video lecture uploaded successfully!');
+      toast.success("Video lecture uploaded successfully!");
       setVideoFile(null);
-      setVideoTitle('');
-      setVideoDescription('');
-      setVideoChapter('');
-      setVideoTopic('');
+      setVideoTitle("");
+      setVideoDescription("");
+      setVideoChapter("");
+      setVideoTopic("");
       setShowVideoUploadForm(false);
       router.refresh();
     } catch (error) {
-      console.error('Error uploading video:', error);
-      toast.error('Failed to upload video lecture');
+      console.error("Error uploading video:", error);
+      toast.error("Failed to upload video lecture");
     } finally {
       setIsUploadingVideo(false);
     }
@@ -319,15 +286,11 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
               <div className="flex items-center justify-between">
                 <span className="text-gray-600 flex items-center">
                   <FileText className="h-5 w-5 mr-2" />
-                  Syllabus Status
+                  Total Subjects
                 </span>
-                {classroom.hasSyllabus ? (
-                  <Badge className="bg-green-500">
-                    {classroom.syllabusName}
-                  </Badge>
-                ) : (
-                  <Badge variant="outline">Not uploaded</Badge>
-                )}
+                <span className="text-2xl font-bold">
+                  {classroom.subjects ? classroom.subjects.length : 0}
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -377,65 +340,48 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
           </Card>
         </div>
 
-        {/* Upload Syllabus */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Upload className="h-5 w-5 mr-2" />
-              Upload Syllabus
-            </CardTitle>
-            <CardDescription>
-              Upload a PDF syllabus for this classroom. It will be processed
-              using AI.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSyllabusUpload} className="space-y-4">
-              <div>
-                <Label htmlFor="subjectName">Subject Name</Label>
-                <Input
-                  id="subjectName"
-                  placeholder="e.g., Mathematics 101"
-                  value={subjectName}
-                  onChange={(e) => setSubjectName(e.target.value)}
-                  disabled={isUploading}
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="pdfFile">Syllabus PDF</Label>
-                <Input
-                  id="pdfFile"
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handleFileChange}
-                  disabled={isUploading}
-                  className="mt-2"
-                />
-                {file && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    Selected: {file.name}
-                  </p>
-                )}
-              </div>
-              <Button
-                type="submit"
-                disabled={isUploading || !file || !subjectName.trim()}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Uploading and processing...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload Syllabus
-                  </>
-                )}
-              </Button>
-            </form>
+        {/* Add Subject Card */}
+        <Card
+          className="mb-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-2xl rounded-2xl overflow-hidden cursor-pointer"
+          onClick={() => router.push(`/classroom/${classroom.id}/add-subject`)}
+        >
+          <CardContent className="pt-6 flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold mb-2">Add Subject</h3>
+              <p className="text-blue-100">
+                Create and add a new subject to this classroom
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-gray-100"
+            >
+              Go to Add Subject
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Card to view all subjects in the classroom */}
+        <Card
+          className="mb-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-2xl rounded-2xl overflow-hidden cursor-pointer"
+          onClick={() => router.push(`/classroom/${classroom.id}/subjects`)}
+        >
+          <CardContent className="pt-6 flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold mb-2">View All Subjects</h3>
+              <p className="text-blue-100">
+                See all subjects, chapters, and topics for this classroom
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-gray-100"
+              href={`/classroom/${classroom.id}/subjects`}
+            >
+              Go to Subjects
+            </Button>
           </CardContent>
         </Card>
 
@@ -456,7 +402,7 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
                 onClick={() => setShowAnnouncementForm(!showAnnouncementForm)}
                 variant="outline"
               >
-                {showAnnouncementForm ? 'Cancel' : 'New Announcement'}
+                {showAnnouncementForm ? "Cancel" : "New Announcement"}
               </Button>
             </div>
           </CardHeader>
@@ -528,7 +474,9 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
               {announcements.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <Megaphone className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                  <p>No announcements yet. Create one to keep students informed!</p>
+                  <p>
+                    No announcements yet. Create one to keep students informed!
+                  </p>
                 </div>
               ) : (
                 announcements.map((announcement) => (
@@ -536,8 +484,8 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
                     key={announcement.id}
                     className={`p-4 rounded-lg border ${
                       announcement.isPinned
-                        ? 'bg-yellow-50 border-yellow-200'
-                        : 'bg-white border-gray-200'
+                        ? "bg-yellow-50 border-yellow-200"
+                        : "bg-white border-gray-200"
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
@@ -583,7 +531,7 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
                 onClick={() => setShowVideoUploadForm(!showVideoUploadForm)}
                 variant="outline"
               >
-                {showVideoUploadForm ? 'Cancel' : 'Upload Video'}
+                {showVideoUploadForm ? "Cancel" : "Upload Video"}
               </Button>
             </div>
           </CardHeader>
@@ -605,7 +553,8 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
                   />
                   {videoFile && (
                     <p className="text-sm text-gray-600 mt-2">
-                      Selected: {videoFile.name} ({formatFileSize(videoFile.size)})
+                      Selected: {videoFile.name} (
+                      {formatFileSize(videoFile.size)})
                     </p>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
@@ -662,7 +611,9 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
                 </div>
                 <Button
                   type="submit"
-                  disabled={isUploadingVideo || !videoFile || !videoTitle.trim()}
+                  disabled={
+                    isUploadingVideo || !videoFile || !videoTitle.trim()
+                  }
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
                 >
                   {isUploadingVideo ? (
@@ -754,4 +705,3 @@ export function ClassroomDetailClient({ classroom, announcements = [], videoLect
     </div>
   );
 }
-

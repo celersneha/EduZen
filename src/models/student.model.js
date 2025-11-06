@@ -8,12 +8,6 @@ const studentSchema = new Schema(
       required: true,
       unique: true,
     },
-    subjects: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Subject",
-      },
-    ],
     classrooms: [
       {
         type: mongoose.Schema.Types.ObjectId,

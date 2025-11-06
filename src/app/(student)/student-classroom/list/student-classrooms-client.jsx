@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ArrowRight, BookOpen, Plus, GraduationCap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Link from "next/link";
+import { ArrowRight, BookOpen, Plus, GraduationCap } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export function StudentClassroomsClient({ classrooms, error }) {
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-100 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Error Loading Classrooms
@@ -27,7 +27,7 @@ export function StudentClassroomsClient({ classrooms, error }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-100 to-blue-50">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -37,7 +37,7 @@ export function StudentClassroomsClient({ classrooms, error }) {
             <p className="text-gray-600">View all classrooms you've joined</p>
           </div>
           <Link href="/classroom/join">
-            <Button>
+            <Button variant="gradient">
               <Plus className="mr-2 h-4 w-4" />
               Join Classroom
             </Button>
@@ -56,7 +56,7 @@ export function StudentClassroomsClient({ classrooms, error }) {
                   Join a classroom using the code provided by your teacher
                 </p>
                 <Link href="/classroom/join">
-                  <Button>
+                  <Button variant="gradient">
                     <Plus className="mr-2 h-4 w-4" />
                     Join Your First Classroom
                   </Button>
@@ -83,23 +83,7 @@ export function StudentClassroomsClient({ classrooms, error }) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 flex items-center">
-                        <BookOpen className="h-4 w-4 mr-1" />
-                        Syllabus
-                      </span>
-                      {classroom.hasSyllabus ? (
-                        <Badge variant="outline" className="bg-green-50 text-green-700">
-                          Available
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="bg-gray-50 text-gray-500">
-                          Not available
-                        </Badge>
-                      )}
-                    </div>
-
-                    <Link href={`/student/classroom/${classroom.id}`}>
+                    <Link href={`/student-classroom/${classroom.id}`}>
                       <Button className="w-full" variant="outline">
                         View Classroom
                         <ArrowRight className="ml-2 h-4 w-4" />
@@ -115,4 +99,3 @@ export function StudentClassroomsClient({ classrooms, error }) {
     </div>
   );
 }
-

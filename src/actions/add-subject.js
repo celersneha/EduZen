@@ -1,12 +1,12 @@
-'use server';
+"use server";
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import SubjectModel from '@/models/subject.model';
-import dbConnect from '@/lib/dbConnect';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import StudentModel from '@/models/student.model';
-import { revalidatePath } from 'next/cache';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import SubjectModel from "@/models/subject.model";
+import dbConnect from "@/lib/dbConnect";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { revalidatePath } from "next/cache";
+import ClassroomModel from "@/models/classroom.model";
 
 /**
  * Server action to add a subject by processing a syllabus PDF
@@ -19,29 +19,38 @@ export async function addSubject(formData) {
     const session = await getServerSession(authOptions);
 
     const user = session?.user;
-    if (!user) {
+    if (!user || user.role !== "teacher") {
       return {
         data: null,
-        error: 'Unauthorized',
+        error: "Only teachers can add subjects",
       };
     }
 
-    const file = formData.get('pdf');
-    const subjectName = formData.get('subjectName');
+    console.log("User adding subject:", user);
 
-    if (!subjectName || subjectName.trim() === '') {
+    const file = formData.get("pdf");
+    const subjectName = formData.get("subjectName");
+
+    if (!subjectName || subjectName.trim() === "") {
       return {
         data: null,
-        error: 'Subject name is required',
+        error: "Subject name is required",
       };
     }
 
-    const studentId = user.id;
+    const classroomId = formData.get("classroomId");
+
+    if (!classroomId || classroomId.trim() === "") {
+      return {
+        data: null,
+        error: "Classroom ID is required",
+      };
+    }
 
     if (!file) {
       return {
         data: null,
-        error: 'No file uploaded',
+        error: "No file uploaded",
       };
     }
 
@@ -51,14 +60,14 @@ export async function addSubject(formData) {
 
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Process PDF with Gemini
     const result = await model.generateContent([
       {
         inlineData: {
-          data: pdfBuffer.toString('base64'),
-          mimeType: 'application/pdf',
+          data: pdfBuffer.toString("base64"),
+          mimeType: "application/pdf",
         },
       },
       `You are a syllabus analyzer. Extract the following information from this syllabus PDF:
@@ -93,8 +102,8 @@ Important rules:
     let text = response.text().trim();
 
     // Clean up the response string
-    text = text.replace(/^```json\s*|\s*```$/g, ''); // Remove markdown code block markers
-    text = text.replace(/^["']|["']$/g, ''); // Remove surrounding quotes if any
+    text = text.replace(/^```json\s*|\s*```$/g, ""); // Remove markdown code block markers
+    text = text.replace(/^['"]|['"]$/g, ""); // Remove surrounding quotes if any
     text = text.replace(/\\"/g, '"'); // Replace escaped quotes with regular quotes
     text = text.trim(); // Remove any extra whitespace
 
@@ -108,41 +117,42 @@ Important rules:
         .map((topic) =>
           topic
             .trim()
-            .replace(/^\d+\.\s*/, '') // Remove leading numbers
-            .replace(/^[-•]\s*/, '') // Remove leading bullets
+            .replace(/^\d+\.\s*/, "") // Remove leading numbers
+            .replace(/^[-•]\s*/, "") // Remove leading bullets
             .trim()
         )
         .filter((topic) => topic.length > 0), // Remove empty topics
     }));
 
-    // Add the user-provided subject name
+    syllabusData.classroom = classroomId;
+
+    // Add the user-provided subject name and classroomId
     syllabusData.subjectName = subjectName;
 
     // Create subject document
     const subject = new SubjectModel(syllabusData);
     await subject.save();
 
-    // Update student with the new subject
-    await StudentModel.findByIdAndUpdate(
-      studentId,
-      { $push: { subjects: subject._id } },
+    // Update classroom with the new subjectID (array)
+    await ClassroomModel.findByIdAndUpdate(
+      classroomId,
+      { $push: { subjectID: subject._id } },
       { new: true }
     );
-
     // Revalidate relevant paths
-    revalidatePath('/show-subjects');
-    revalidatePath('/dashboard');
+    revalidatePath(`/classroom/${classroomId}/subjects`);
+    revalidatePath("/show-subjects");
+    revalidatePath("/dashboard");
 
     return {
       data: syllabusData,
       error: null,
     };
   } catch (error) {
-    console.error('Error processing syllabus:', error);
+    console.error("Error processing syllabus:", error);
     return {
       data: null,
-      error: 'Failed to process syllabus',
+      error: "Failed to process syllabus",
     };
   }
 }
-

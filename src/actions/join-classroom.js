@@ -1,11 +1,11 @@
-'use server';
+"use server";
 
-import dbConnect from '@/lib/dbConnect';
-import ClassroomModel from '@/models/classroom.model';
-import StudentModel from '@/models/student.model';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import { revalidatePath } from 'next/cache';
+import dbConnect from "@/lib/dbConnect";
+import ClassroomModel from "@/models/classroom.model";
+import StudentModel from "@/models/student.model";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { revalidatePath } from "next/cache";
 
 /**
  * Server action for a student to join a classroom
@@ -18,26 +18,33 @@ export async function joinClassroom(classroomCode) {
     const session = await getServerSession(authOptions);
 
     const user = session?.user;
-    if (!user || user.role !== 'student') {
+    if (!user || user.role !== "student") {
       return {
         data: null,
-        error: 'Unauthorized. Student access required.',
+        error: "Unauthorized. Student access required.",
       };
     }
 
     if (!classroomCode) {
       return {
         data: null,
-        error: 'Classroom code is required',
+        error: "Classroom code is required",
       };
     }
 
     // Find student record
     const student = await StudentModel.findOne({ userId: user.id });
+
+    console.log(
+      "Joining classroom - student:",
+      student,
+      "code:",
+      classroomCode
+    );
     if (!student) {
       return {
         data: null,
-        error: 'Student record not found',
+        error: "Student record not found",
       };
     }
 
@@ -46,7 +53,7 @@ export async function joinClassroom(classroomCode) {
     if (!classroom) {
       return {
         data: null,
-        error: 'Classroom not found',
+        error: "Classroom not found",
       };
     }
 
@@ -54,7 +61,7 @@ export async function joinClassroom(classroomCode) {
     if (classroom.students.includes(student._id)) {
       return {
         data: null,
-        error: 'You are already a member of this classroom',
+        error: "You are already a member of this classroom",
       };
     }
 
@@ -73,11 +80,11 @@ export async function joinClassroom(classroomCode) {
     );
 
     // Revalidate student classrooms list
-    revalidatePath('/classroom/list');
+    revalidatePath("/classroom/list");
 
     return {
       data: {
-        message: 'Successfully joined classroom',
+        message: "Successfully joined classroom",
         classroom: {
           id: classroom._id.toString(),
           classroomName: classroom.classroomName,
@@ -87,11 +94,10 @@ export async function joinClassroom(classroomCode) {
       error: null,
     };
   } catch (error) {
-    console.error('Error joining classroom:', error);
+    console.error("Error joining classroom:", error);
     return {
       data: null,
-      error: 'Failed to join classroom',
+      error: "Failed to join classroom",
     };
   }
 }
-

@@ -23,7 +23,15 @@ export function Navbar() {
   return (
     <nav className="container mx-auto p-4 flex items-center justify-between">
       <div className="flex items-center">
-        <Link href={session ? (session.user?.role === "teacher" ? "/teacher/dashboard" : "/dashboard") : "/"}>
+        <Link
+          href={
+            session
+              ? session.user?.role === "teacher"
+                ? "/teacher/dashboard"
+                : "/dashboard"
+              : "/"
+          }
+        >
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg p-2 cursor-pointer hover:shadow-lg transition-shadow">
             <span className="text-xl">EduZen</span>
           </div>
@@ -34,7 +42,11 @@ export function Navbar() {
         // Logged in user navigation
         <div className="hidden md:flex space-x-6 items-center">
           <Link
-            href={session.user?.role === "teacher" ? "/teacher/dashboard" : "/dashboard"}
+            href={
+              session.user?.role === "teacher"
+                ? "/teacher/dashboard"
+                : "/dashboard"
+            }
             className="text-gray-600 hover:text-gray-900 transition-colors"
           >
             Dashboard
@@ -42,7 +54,7 @@ export function Navbar() {
           {session.user?.role === "teacher" ? (
             <>
               <Link
-                href="/teacher/classroom/create"
+                href="/classroom/create"
                 className="text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Create Classroom
@@ -61,12 +73,6 @@ export function Navbar() {
                 className="text-gray-600 hover:text-gray-900 transition-colors"
               >
                 My Subjects
-              </Link>
-              <Link
-                href="/add-subject"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Add Subject
               </Link>
             </>
           )}
@@ -105,8 +111,12 @@ export function Navbar() {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link 
-                  href={session.user?.role === "teacher" ? "/teacher/dashboard" : "/dashboard"} 
+                <Link
+                  href={
+                    session.user?.role === "teacher"
+                      ? "/teacher/dashboard"
+                      : "/dashboard"
+                  }
                   className="cursor-pointer"
                 >
                   <BarChart3 className="mr-2 h-4 w-4" />
@@ -116,7 +126,7 @@ export function Navbar() {
               {session.user?.role === "teacher" ? (
                 <>
                   <DropdownMenuItem asChild>
-                    <Link href="/teacher/classroom/create" className="cursor-pointer">
+                    <Link href="/classroom/create" className="cursor-pointer">
                       <BookOpen className="mr-2 h-4 w-4" />
                       Create Classroom
                     </Link>
