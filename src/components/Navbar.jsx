@@ -28,9 +28,7 @@ export function Navbar() {
         <Link
           href={
             session
-              ? session.user?.role === "teacher"
-                ? "/teacher/dashboard"
-                : "/student/dashboard"
+              ? session.user?.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard"
               : "/"
           }
         >
@@ -51,11 +49,7 @@ export function Navbar() {
         // Logged in user navigation
         <div className="hidden md:flex space-x-6 items-center">
           <Link
-            href={
-              session.user?.role === "teacher"
-                ? "/teacher/dashboard"
-                : "/student/dashboard"
-            }
+            href={session.user?.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard"}
             className="text-gray-600 hover:text-gray-900 transition-colors"
           >
             Dashboard
@@ -63,7 +57,7 @@ export function Navbar() {
           {session.user?.role === "teacher" ? (
             <>
               <Link
-                href="/classroom/create"
+                href="/teacher/classroom/create"
                 className="text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Create Classroom
@@ -72,7 +66,7 @@ export function Navbar() {
           ) : (
             <>
               <Link
-                href="/student-classroom/list"
+                href="/student/student-classroom/list"
                 className="text-gray-600 hover:text-gray-900 transition-colors"
               >
                 My Classrooms
@@ -118,11 +112,7 @@ export function Navbar() {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link
-                  href={
-                    session.user?.role === "teacher"
-                      ? "/teacher/dashboard"
-                      : "/student/dashboard"
-                  }
+                  href={session.user?.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard"}
                   className="cursor-pointer"
                 >
                   <BarChart3 className="mr-2 h-4 w-4" />
@@ -132,7 +122,7 @@ export function Navbar() {
               {session.user?.role === "teacher" ? (
                 <>
                   <DropdownMenuItem asChild>
-                    <Link href="/classroom/create" className="cursor-pointer">
+                    <Link href="/teacher/classroom/create" className="cursor-pointer">
                       <BookOpen className="mr-2 h-4 w-4" />
                       Create Classroom
                     </Link>
@@ -141,7 +131,7 @@ export function Navbar() {
               ) : (
                 <>
                   <DropdownMenuItem asChild>
-                    <Link href="/student-classroom/list" className="cursor-pointer">
+                    <Link href="/student/student-classroom/list" className="cursor-pointer">
                       <BookOpen className="mr-2 h-4 w-4" />
                       My Classrooms
                     </Link>
