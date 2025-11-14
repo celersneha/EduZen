@@ -25,15 +25,8 @@ export async function uploadVideoToCloudinary(
         resource_type: 'video',
         folder: folder,
         public_id: fileName.replace(/\.[^/.]+$/, ''), // Remove file extension
-        format: 'auto',
         chunk_size: 6000000, // 6MB chunks for large files
-        eager: [
-          { quality: 'auto', fetch_format: 'auto' },
-        ],
-        eager_async: false,
-        transformation: [
-          { quality: 'auto', fetch_format: 'auto' },
-        ],
+        // Let Cloudinary handle video format automatically
       },
       (error, result) => {
         if (error) {

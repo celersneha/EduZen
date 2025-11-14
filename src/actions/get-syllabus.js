@@ -1,14 +1,16 @@
+'use server';
+
 import dbConnect from '@/lib/dbConnect';
 import ClassroomModel from '@/models/classroom.model';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 /**
- * Fetcher to get syllabus data for a classroom
+ * Server action to get syllabus data for a classroom
  * @param {string} classroomId - Classroom ID
  * @returns {Promise<{data: object | null, error: string | null}>}
  */
-export async function getSyllabus(classroomId) {
+export async function getSyllabusAction(classroomId) {
   try {
     await dbConnect();
     const session = await getServerSession(authOptions);
@@ -47,8 +49,17 @@ export async function getSyllabus(classroomId) {
       };
     }
 
+    // Transform subject data for client
+    const subjectData = {
+      id: classroom.subject._id.toString(),
+      subjectName: classroom.subject.subjectName,
+      subjectDescription: classroom.subject.subjectDescription,
+      chapters: classroom.subject.chapters || [],
+      createdAt: classroom.subject.createdAt,
+    };
+
     return {
-      data: classroom.subject,
+      data: subjectData,
       error: null,
     };
   } catch (error) {

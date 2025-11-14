@@ -1,7 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbConnect";
-import sendVerificationEmail from "@/utils/sendVerificationEmail";
+import sendVerificationEmail from "@/actions/utils/send-verification-email";
 import UserModel from "@/models/user.model";
 
 export const authOptions = {

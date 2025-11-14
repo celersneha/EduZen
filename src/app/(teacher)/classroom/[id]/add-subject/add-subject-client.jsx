@@ -28,7 +28,7 @@ const formSchema = z.object({
     .refine((file) => file instanceof File, "Please upload a PDF file"),
 });
 
-export function AddSubjectClient() {
+export function AddSubjectClient({ classroomId }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm({
@@ -39,15 +39,16 @@ export function AddSubjectClient() {
     },
   });
 
-  // Extract classroomId from the current path
-  let classroomId = null;
-  if (typeof window !== "undefined") {
-    const match = window.location.pathname.match(
-      /classroom\/(.*?)\/add-subject/
+  if (!classroomId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Classroom ID is required
+          </h2>
+        </div>
+      </div>
     );
-    if (match && match[1]) {
-      classroomId = match[1];
-    }
   }
 
   const handleSubmit = async (values) => {
@@ -67,9 +68,9 @@ export function AddSubjectClient() {
         return;
       }
 
-      toast.success("Syllabus uploaded successfully!");
+      toast.success("Subject added successfully!");
       form.reset();
-      router.push("/show-subjects");
+      router.push(`/classroom/${classroomId}/subject`);
     } catch (err) {
       console.error("Error uploading syllabus:", err);
       toast.error(err.message || "Failed to upload syllabus");

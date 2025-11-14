@@ -1,4 +1,4 @@
-import sendVerificationEmail from "@/utils/sendVerificationEmail";
+import sendVerificationEmail from "@/actions/utils/send-verification-email";
 import dbConnect from "@/lib/dbConnect";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";

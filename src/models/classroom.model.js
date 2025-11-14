@@ -12,12 +12,10 @@ const classroomSchema = new Schema(
       ref: "Teacher",
       required: true,
     },
-    subjectID: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Subject",
-      },
-    ],
+    subject: {
+      type: Schema.Types.ObjectId,
+      ref: "Subject",
+    },
     classroomCode: {
       type: String,
       required: true,
@@ -33,10 +31,15 @@ const classroomSchema = new Schema(
   },
   {
     timestamps: true,
+    strictPopulate: false,
   }
 );
 
-const ClassroomModel =
-  mongoose.models.Classroom || mongoose.model("Classroom", classroomSchema);
+// Delete the model if it exists to force recompilation with new schema
+if (mongoose.models.Classroom) {
+  delete mongoose.models.Classroom;
+}
+
+const ClassroomModel = mongoose.model("Classroom", classroomSchema);
 
 export default ClassroomModel;

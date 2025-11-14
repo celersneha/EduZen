@@ -79,7 +79,6 @@ export async function createAnnouncement(announcementData) {
 
     // Revalidate classroom pages
     revalidatePath(`/classroom/${classroomId}`);
-    revalidatePath(`/classroom/${classroomId}`);
 
     return {
       data: {

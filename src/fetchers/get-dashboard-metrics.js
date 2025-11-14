@@ -22,16 +22,14 @@ export async function getDashboardMetrics() {
       };
     }
 
-    console.log("Fetching dashboard metrics for user:", user);
 
     const studentId = user.id;
 
-    // Get student with populated subjects
+    // Get student with populated classrooms
     const student = await StudentModel.findOne({ userId: studentId }).populate(
-      "subjects"
+      "classrooms"
     );
 
-    console.log("Fetched student data:", student);
 
     if (!student) {
       return {
@@ -40,7 +38,11 @@ export async function getDashboardMetrics() {
       };
     }
 
-    const subjects = student.subjects || [];
+    // Get all subjects from student's classrooms
+    const classroomIds = student.classrooms?.map((c) => c._id) || [];
+    const subjects = await SubjectModel.find({
+      classroom: { $in: classroomIds },
+    });
     const totalSubjects = subjects.length;
 
     // Calculate real metrics from actual data

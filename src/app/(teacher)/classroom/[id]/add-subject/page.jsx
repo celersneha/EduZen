@@ -8,12 +8,14 @@ export const metadata = {
   description: 'Upload your syllabus PDF and let AI organize it',
 };
 
-export default async function AddSubjectPage() {
+export default async function AddSubjectPage({ params }) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user) {
-    redirect('/login');
+  if (!session?.user || session.user.role !== 'teacher') {
+    redirect('/dashboard');
   }
 
-  return <AddSubjectClient />;
+  const resolvedParams = await params;
+
+  return <AddSubjectClient classroomId={resolvedParams.id} />;
 }

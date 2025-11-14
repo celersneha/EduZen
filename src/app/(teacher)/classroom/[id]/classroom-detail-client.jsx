@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   Users,
   Mail,
-  Upload,
   FileText,
   Copy,
   CheckCircle,
@@ -27,24 +26,18 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { inviteStudents } from "@/actions/invite-students";
-import { uploadClassroomSyllabus } from "@/actions/upload-classroom-syllabus";
 import { createAnnouncement } from "@/actions/create-announcement";
-import { uploadVideoLecture } from "@/actions/upload-video-lecture";
 import {
   Megaphone,
   Pin,
   Send,
-  Video,
-  Upload as UploadIcon,
-  Play,
-  Clock,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export function ClassroomDetailClient({
   classroom,
   announcements = [],
-  videoLectures = [],
+  announcementsError = null,
 }) {
   const router = useRouter();
   const [inviteEmails, setInviteEmails] = useState("");
@@ -55,13 +48,6 @@ export function ClassroomDetailClient({
   const [announcementContent, setAnnouncementContent] = useState("");
   const [isPinned, setIsPinned] = useState(false);
   const [isPostingAnnouncement, setIsPostingAnnouncement] = useState(false);
-  const [showVideoUploadForm, setShowVideoUploadForm] = useState(false);
-  const [videoFile, setVideoFile] = useState(null);
-  const [videoTitle, setVideoTitle] = useState("");
-  const [videoDescription, setVideoDescription] = useState("");
-  const [videoChapter, setVideoChapter] = useState("");
-  const [videoTopic, setVideoTopic] = useState("");
-  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
   const handleInvite = async () => {
     if (!inviteEmails.trim()) {
@@ -154,80 +140,6 @@ export function ClassroomDetailClient({
     });
   };
 
-  const handleVideoFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      if (selectedFile.type.startsWith("video/")) {
-        // Validate file size (500MB max)
-        const maxSize = 500 * 1024 * 1024;
-        if (selectedFile.size > maxSize) {
-          toast.error("Video file size exceeds 500MB limit");
-          return;
-        }
-        setVideoFile(selectedFile);
-      } else {
-        toast.error("Please select a video file");
-      }
-    }
-  };
-
-  const formatDuration = (seconds) => {
-    if (!seconds) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const formatFileSize = (bytes) => {
-    if (!bytes) return "0 B";
-    const mb = bytes / (1024 * 1024);
-    if (mb >= 1) {
-      return `${mb.toFixed(2)} MB`;
-    }
-    const kb = bytes / 1024;
-    return `${kb.toFixed(2)} KB`;
-  };
-
-  const handleVideoUpload = async (e) => {
-    e.preventDefault();
-    if (!videoFile || !videoTitle.trim()) {
-      toast.error("Please select a video file and enter a title");
-      return;
-    }
-
-    setIsUploadingVideo(true);
-    try {
-      const formData = new FormData();
-      formData.append("video", videoFile);
-      formData.append("title", videoTitle.trim());
-      formData.append("description", videoDescription.trim());
-      formData.append("classroomId", classroom.id);
-      formData.append("chapter", videoChapter.trim());
-      formData.append("topic", videoTopic.trim());
-
-      const { data, error } = await uploadVideoLecture(formData);
-
-      if (error) {
-        toast.error(error);
-        return;
-      }
-
-      toast.success("Video lecture uploaded successfully!");
-      setVideoFile(null);
-      setVideoTitle("");
-      setVideoDescription("");
-      setVideoChapter("");
-      setVideoTopic("");
-      setShowVideoUploadForm(false);
-      router.refresh();
-    } catch (error) {
-      console.error("Error uploading video:", error);
-      toast.error("Failed to upload video lecture");
-    } finally {
-      setIsUploadingVideo(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-8">
@@ -286,11 +198,24 @@ export function ClassroomDetailClient({
               <div className="flex items-center justify-between">
                 <span className="text-gray-600 flex items-center">
                   <FileText className="h-5 w-5 mr-2" />
-                  Total Subjects
+                  Subject
                 </span>
-                <span className="text-2xl font-bold">
-                  {classroom.subjects ? classroom.subjects.length : 0}
-                </span>
+                <div className="text-right">
+                  {classroom.subject ? (
+                    <>
+                      <span className="text-2xl font-bold block">
+                        {classroom.subject.subjectName}
+                      </span>
+                      {classroom.subject.chapterCount > 0 && (
+                        <span className="text-xs text-gray-500">
+                          {classroom.subject.chapterCount} chapters
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-2xl font-bold text-gray-400">None</span>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -340,50 +265,64 @@ export function ClassroomDetailClient({
           </Card>
         </div>
 
-        {/* Add Subject Card */}
-        <Card
-          className="mb-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-2xl rounded-2xl overflow-hidden cursor-pointer"
-          onClick={() => router.push(`/classroom/${classroom.id}/add-subject`)}
-        >
-          <CardContent className="pt-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold mb-2">Add Subject</h3>
-              <p className="text-blue-100">
-                Create and add a new subject to this classroom
-              </p>
-            </div>
-            <Button
-              variant="secondary"
-              size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100"
-            >
-              Go to Add Subject
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Card to view all subjects in the classroom */}
-        <Card
-          className="mb-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-2xl rounded-2xl overflow-hidden cursor-pointer"
-          onClick={() => router.push(`/classroom/${classroom.id}/subjects`)}
-        >
-          <CardContent className="pt-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold mb-2">View All Subjects</h3>
-              <p className="text-blue-100">
-                See all subjects, chapters, and topics for this classroom
-              </p>
-            </div>
-            <Button
-              variant="secondary"
-              size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100"
-              href={`/classroom/${classroom.id}/subjects`}
-            >
-              Go to Subjects
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Subject Management Card - Shows Add Subject if no subject, View Subject if subject exists */}
+        {!classroom.subject ? (
+          <Card
+            className="mb-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-2xl rounded-2xl overflow-hidden cursor-pointer"
+            onClick={() => router.push(`/classroom/${classroom.id}/add-subject`)}
+          >
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold mb-2">Add Subject</h3>
+                <p className="text-blue-100">
+                  Create and add a subject to this classroom to get started
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-gray-100"
+              >
+                Add Subject
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card
+            className="mb-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-2xl rounded-2xl overflow-hidden cursor-pointer"
+            onClick={() => router.push(`/classroom/${classroom.id}/subject`)}
+          >
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="text-xl font-bold mb-2">
+                  {classroom.subject.subjectName}
+                </h3>
+                <p className="text-blue-100 mb-2">
+                  {classroom.subject.chapterCount > 0
+                    ? `${classroom.subject.chapterCount} chapters available`
+                    : "Subject created - upload syllabus to add chapters"}
+                </p>
+                <div className="flex items-center gap-4 mt-3">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span className="text-sm text-blue-100">
+                      {classroom.subject.chapterCount > 0
+                        ? "Syllabus uploaded"
+                        : "No syllabus yet"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <Button
+                variant="secondary"
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-gray-100 ml-4"
+              >
+                View Details
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Announcements Section */}
         <Card>
@@ -471,7 +410,12 @@ export function ClassroomDetailClient({
             )}
 
             <div className="space-y-4">
-              {announcements.length === 0 ? (
+              {announcementsError ? (
+                <div className="text-center py-8 text-red-500">
+                  <Megaphone className="h-12 w-12 mx-auto mb-2 text-red-400" />
+                  <p>Error loading announcements: {announcementsError}</p>
+                </div>
+              ) : announcements.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <Megaphone className="h-12 w-12 mx-auto mb-2 text-gray-400" />
                   <p>
@@ -509,194 +453,6 @@ export function ClassroomDetailClient({
                     </p>
                   </div>
                 ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Video Lectures Section */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center">
-                  <Video className="h-5 w-5 mr-2" />
-                  Video Lectures
-                </CardTitle>
-                <CardDescription>
-                  Upload and manage video lectures for your students
-                </CardDescription>
-              </div>
-              <Button
-                onClick={() => setShowVideoUploadForm(!showVideoUploadForm)}
-                variant="outline"
-              >
-                {showVideoUploadForm ? "Cancel" : "Upload Video"}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {showVideoUploadForm && (
-              <form
-                onSubmit={handleVideoUpload}
-                className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4"
-              >
-                <div>
-                  <Label htmlFor="videoFile">Video File</Label>
-                  <Input
-                    id="videoFile"
-                    type="file"
-                    accept="video/*"
-                    onChange={handleVideoFileChange}
-                    disabled={isUploadingVideo}
-                    className="mt-2"
-                  />
-                  {videoFile && (
-                    <p className="text-sm text-gray-600 mt-2">
-                      Selected: {videoFile.name} (
-                      {formatFileSize(videoFile.size)})
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Maximum file size: 500MB. Supported formats: MP4, WebM, etc.
-                  </p>
-                </div>
-                <div>
-                  <Label htmlFor="videoTitle">Title *</Label>
-                  <Input
-                    id="videoTitle"
-                    placeholder="e.g., Introduction to Calculus"
-                    value={videoTitle}
-                    onChange={(e) => setVideoTitle(e.target.value)}
-                    disabled={isUploadingVideo}
-                    className="mt-2"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="videoDescription">Description</Label>
-                  <Textarea
-                    id="videoDescription"
-                    placeholder="Brief description of the video lecture..."
-                    value={videoDescription}
-                    onChange={(e) => setVideoDescription(e.target.value)}
-                    disabled={isUploadingVideo}
-                    rows={3}
-                    className="mt-2 resize-none"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="videoChapter">Chapter (Optional)</Label>
-                    <Input
-                      id="videoChapter"
-                      placeholder="e.g., Chapter 1"
-                      value={videoChapter}
-                      onChange={(e) => setVideoChapter(e.target.value)}
-                      disabled={isUploadingVideo}
-                      className="mt-2"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="videoTopic">Topic (Optional)</Label>
-                    <Input
-                      id="videoTopic"
-                      placeholder="e.g., Limits and Continuity"
-                      value={videoTopic}
-                      onChange={(e) => setVideoTopic(e.target.value)}
-                      disabled={isUploadingVideo}
-                      className="mt-2"
-                    />
-                  </div>
-                </div>
-                <Button
-                  type="submit"
-                  disabled={
-                    isUploadingVideo || !videoFile || !videoTitle.trim()
-                  }
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
-                >
-                  {isUploadingVideo ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Uploading video...
-                    </>
-                  ) : (
-                    <>
-                      <UploadIcon className="mr-2 h-4 w-4" />
-                      Upload Video Lecture
-                    </>
-                  )}
-                </Button>
-              </form>
-            )}
-
-            <div className="space-y-4">
-              {videoLectures.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Video className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                  <p>No video lectures yet. Upload one to get started!</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {videoLectures.map((lecture) => (
-                    <div
-                      key={lecture.id}
-                      className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-                    >
-                      {lecture.thumbnailUrl ? (
-                        <div className="relative aspect-video bg-gray-100">
-                          <img
-                            src={lecture.thumbnailUrl}
-                            alt={lecture.title}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            <Play className="h-12 w-12 text-white" />
-                          </div>
-                          {lecture.duration > 0 && (
-                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {formatDuration(lecture.duration)}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                          <Video className="h-12 w-12 text-gray-400" />
-                        </div>
-                      )}
-                      <div className="p-4">
-                        <h3 className="font-semibold text-lg mb-1 line-clamp-2">
-                          {lecture.title}
-                        </h3>
-                        {lecture.description && (
-                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                            {lecture.description}
-                          </p>
-                        )}
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>{formatFileSize(lecture.fileSize)}</span>
-                          <span>{formatDate(lecture.createdAt)}</span>
-                        </div>
-                        {(lecture.chapter || lecture.topic) && (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {lecture.chapter && (
-                              <Badge variant="outline" className="text-xs">
-                                {lecture.chapter}
-                              </Badge>
-                            )}
-                            {lecture.topic && (
-                              <Badge variant="outline" className="text-xs">
-                                {lecture.topic}
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
               )}
             </div>
           </CardContent>

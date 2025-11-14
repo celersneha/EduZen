@@ -3,6 +3,7 @@
 import dbConnect from "@/lib/dbConnect";
 import ClassroomModel from "@/models/classroom.model";
 import StudentModel from "@/models/student.model";
+import NotificationModel from "@/models/notification.model";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { revalidatePath } from "next/cache";
@@ -34,13 +35,6 @@ export async function joinClassroom(classroomCode) {
 
     // Find student record
     const student = await StudentModel.findOne({ userId: user.id });
-
-    console.log(
-      "Joining classroom - student:",
-      student,
-      "code:",
-      classroomCode
-    );
     if (!student) {
       return {
         data: null,
@@ -77,6 +71,17 @@ export async function joinClassroom(classroomCode) {
       student._id,
       { $push: { classrooms: classroom._id } },
       { new: true }
+    );
+
+    // Mark any related classroom invitation notifications as read
+    await NotificationModel.updateMany(
+      {
+        userId: user.id,
+        type: 'classroom_invitation',
+        classroomId: classroom._id,
+        isRead: false,
+      },
+      { isRead: true }
     );
 
     // Revalidate student classrooms list

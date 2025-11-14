@@ -41,6 +41,17 @@ export async function uploadVideoLecture(formData) {
       };
     }
 
+    // Chapter and topic are required
+    const chapterValue = chapter?.trim() || "";
+    const topicValue = topic?.trim() || "";
+
+    if (!chapterValue || !topicValue) {
+      return {
+        data: null,
+        error: "Chapter and topic are required. Please select from your syllabus.",
+      };
+    }
+
     // Validate file type
     if (!file.type.startsWith("video/")) {
       return {
@@ -79,6 +90,20 @@ export async function uploadVideoLecture(formData) {
       };
     }
 
+    // Check if a video already exists for this topic
+    const existingVideo = await VideoLectureModel.findOne({
+      classroom: classroomId,
+      chapter: chapterValue,
+      topic: topicValue,
+    });
+
+    if (existingVideo) {
+      return {
+        data: null,
+        error: `A video lecture already exists for "${topicValue}" in "${chapterValue}". Each topic can only have one video.`,
+      };
+    }
+
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const fileBuffer = Buffer.from(bytes);
@@ -93,8 +118,17 @@ export async function uploadVideoLecture(formData) {
     const fileExtension = file.name.split(".").pop();
     const fileName = `${sanitizedTitle}-${timestamp}.${fileExtension}`;
 
-    // Upload to Cloudinary
-    const folder = `eduzen/classrooms/${classroomId}/videos`;
+    // Upload to Cloudinary with organized folder structure
+    // Structure: eduzen/classrooms/{classroomId}/videos/{chapter}/{topic}
+    const sanitizedChapter = chapterValue
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const sanitizedTopic = topicValue
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const folder = `eduzen/classrooms/${classroomId}/videos/${sanitizedChapter}/${sanitizedTopic}`;
     const uploadResult = await uploadVideoToCloudinary(
       fileBuffer,
       folder,
@@ -111,15 +145,14 @@ export async function uploadVideoLecture(formData) {
       cloudinaryUrl: uploadResult.url,
       duration: uploadResult.duration,
       fileSize: uploadResult.bytes,
-      chapter: chapter.trim(),
-      topic: topic.trim(),
+      chapter: chapterValue,
+      topic: topicValue,
       thumbnailUrl: uploadResult.thumbnailUrl,
     });
 
     await videoLecture.save();
 
     // Revalidate classroom pages
-    revalidatePath(`/classroom/${classroomId}`);
     revalidatePath(`/classroom/${classroomId}`);
 
     return {

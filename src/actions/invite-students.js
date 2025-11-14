@@ -4,9 +4,10 @@ import dbConnect from '@/lib/dbConnect';
 import ClassroomModel from '@/models/classroom.model';
 import TeacherModel from '@/models/teacher.model';
 import UserModel from '@/models/user.model';
+import NotificationModel from '@/models/notification.model';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import sendClassroomInvite from '@/utils/sendClassroomInvite';
+import sendClassroomInvite from './utils/send-classroom-invite';
 
 /**
  * Server action to send classroom invitations to students
@@ -70,6 +71,31 @@ export async function inviteStudents(classroomId, studentEmails) {
           classroom.classroomCode,
           teacherName
         );
+
+        // Create notification for the student if they have an account
+        try {
+          const studentUser = await UserModel.findOne({ email, role: 'student' });
+          if (studentUser) {
+            await NotificationModel.create({
+              userId: studentUser._id,
+              type: 'classroom_invitation',
+              title: 'Classroom Invitation',
+              message: `${teacherName} has invited you to join "${classroom.classroomName}"`,
+              isRead: false,
+              classroomId: classroom._id,
+              classroomCode: classroom.classroomCode,
+              actionUrl: `/classroom/join?code=${classroom.classroomCode}`,
+              metadata: {
+                teacherName,
+                classroomName: classroom.classroomName,
+              },
+            });
+          }
+        } catch (notifError) {
+          // Log but don't fail the invitation if notification creation fails
+          console.error(`Error creating notification for ${email}:`, notifError);
+        }
+
         results.push({
           email,
           success: emailResult.success,

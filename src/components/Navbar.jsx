@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, LogOut, BookOpen, BarChart3 } from "lucide-react";
+import { NotificationBell } from "@/components/notification-bell";
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -76,6 +77,9 @@ export function Navbar() {
               </Link>
             </>
           )}
+
+          {/* Notification Bell */}
+          <NotificationBell />
 
           {/* User dropdown */}
           <DropdownMenu>

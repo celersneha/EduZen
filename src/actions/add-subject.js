@@ -22,11 +22,10 @@ export async function addSubject(formData) {
     if (!user || user.role !== "teacher") {
       return {
         data: null,
-        error: "Only teachers can add subjects",
+        error: "Only teachers can add a subject",
       };
     }
 
-    console.log("User adding subject:", user);
 
     const file = formData.get("pdf");
     const subjectName = formData.get("subjectName");
@@ -124,6 +123,15 @@ Important rules:
         .filter((topic) => topic.length > 0), // Remove empty topics
     }));
 
+    // Check if classroom already has a subject BEFORE creating
+    const existingClassroom = await ClassroomModel.findById(classroomId);
+    if (existingClassroom?.subject) {
+      return {
+        data: null,
+        error: 'This classroom already has a subject. Each classroom can only have one subject.',
+      };
+    }
+
     syllabusData.classroom = classroomId;
 
     // Add the user-provided subject name and classroomId
@@ -133,16 +141,16 @@ Important rules:
     const subject = new SubjectModel(syllabusData);
     await subject.save();
 
-    // Update classroom with the new subjectID (array)
+    // Update classroom with the subject
     await ClassroomModel.findByIdAndUpdate(
       classroomId,
-      { $push: { subjectID: subject._id } },
+      { subject: subject._id },
       { new: true }
     );
     // Revalidate relevant paths
-    revalidatePath(`/classroom/${classroomId}/subjects`);
-    revalidatePath("/show-subjects");
-    revalidatePath("/dashboard");
+    revalidatePath(`/classroom/${classroomId}`);
+    revalidatePath(`/classroom/${classroomId}/subject`);
+    revalidatePath("/teacher/dashboard");
 
     return {
       data: syllabusData,

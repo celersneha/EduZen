@@ -1,4 +1,6 @@
-import sendEmail from "@/utils/nodemailerUtility";
+'use server';
+
+import sendEmail from './nodemailer-utility';
 
 const sendVerificationEmail = async (email, otp) => {
   try {
@@ -22,3 +24,4 @@ const sendVerificationEmail = async (email, otp) => {
 };
 
 export default sendVerificationEmail;
+

@@ -1,4 +1,6 @@
-import sendEmail from "./nodemailerUtility";
+'use server';
+
+import sendEmail from './nodemailer-utility';
 
 const sendClassroomInvite = async (studentEmail, classroomName, classroomCode, teacherName) => {
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";

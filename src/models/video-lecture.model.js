@@ -58,6 +58,8 @@ const videoLectureSchema = new Schema(
 // Index for efficient queries
 videoLectureSchema.index({ classroom: 1, createdAt: -1 });
 videoLectureSchema.index({ teacher: 1 });
+// Ensure one video per topic per classroom
+videoLectureSchema.index({ classroom: 1, chapter: 1, topic: 1 }, { unique: true });
 
 const VideoLectureModel =
   mongoose.models.VideoLecture ||

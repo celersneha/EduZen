@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { getClassrooms } from "@/fetchers/get-classrooms";
 import { getAnnouncements } from "@/fetchers/get-announcements";
-import { getVideoLectures } from "@/fetchers/get-video-lectures";
 import { ClassroomDetailClient } from "./classroom-detail-client";
 
 export const metadata = {
@@ -23,7 +22,16 @@ export default async function ClassroomDetailPage({ params }) {
   const { data: classrooms, error } = await getClassrooms();
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Error Loading Classroom
+          </h2>
+          <p className="text-gray-600">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   const classroom = classrooms?.find((c) => c.id === resolvedParams.id);
@@ -35,14 +43,16 @@ export default async function ClassroomDetailPage({ params }) {
   const { data: announcements, error: announcementsError } =
     await getAnnouncements(resolvedParams.id);
 
-  const { data: videoLectures, error: videoLecturesError } =
-    await getVideoLectures(resolvedParams.id);
+  // Log errors but don't block the page - show empty arrays instead
+  if (announcementsError) {
+    console.error("Error fetching announcements:", announcementsError);
+  }
 
   return (
     <ClassroomDetailClient
       classroom={classroom}
       announcements={announcements || []}
-      videoLectures={videoLectures || []}
+      announcementsError={announcementsError}
     />
   );
 }

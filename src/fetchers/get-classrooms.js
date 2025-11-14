@@ -2,6 +2,7 @@ import dbConnect from "@/lib/dbConnect";
 import ClassroomModel from "@/models/classroom.model";
 import TeacherModel from "@/models/teacher.model";
 import StudentModel from "@/models/student.model";
+import SubjectModel from "@/models/subject.model";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
@@ -37,13 +38,12 @@ export async function getClassrooms() {
       })
         .populate("students", "userId")
         .populate({
-          path: "subjectID",
+          path: "subject",
           select: "subjectName chapters",
         })
-        .select("classroomName classroomCode students subjectID createdAt")
+        .select("classroomName classroomCode students subject createdAt")
         .sort({ createdAt: -1 });
 
-      console.log("Classrooms: ", classrooms);
 
       return {
         data: classrooms.map((c) => ({
@@ -51,13 +51,17 @@ export async function getClassrooms() {
           classroomName: c.classroomName,
           classroomCode: c.classroomCode,
           studentCount: c.students?.length || 0,
-          subjects: Array.isArray(c.subjectID)
-            ? c.subjectID.map((s) => ({
-                id: s._id?.toString(),
-                subjectName: s.subjectName,
-                chapterCount: Array.isArray(s.chapters) ? s.chapters.length : 0,
-              }))
-            : [],
+          subject: c.subject
+            ? {
+                id: c.subject._id?.toString(),
+                subjectName: c.subject.subjectName,
+                chapterCount: Array.isArray(c.subject.chapters)
+                  ? c.subject.chapters.length
+                  : 0,
+              }
+            : null,
+          hasSyllabus: !!c.subject,
+          syllabusName: c.subject?.subjectName || null,
           createdAt: c.createdAt,
         })),
         error: null,
@@ -76,8 +80,11 @@ export async function getClassrooms() {
         _id: { $in: student.classrooms || [] },
       })
         .populate("teacher", "userId")
-        .populate("subjectID", "subjectName")
-        .select("classroomName classroomCode teacher subjectID createdAt")
+        .populate({
+          path: "subject",
+          select: "subjectName",
+        })
+        .select("classroomName classroomCode teacher subject createdAt")
         .sort({ createdAt: -1 });
 
       return {

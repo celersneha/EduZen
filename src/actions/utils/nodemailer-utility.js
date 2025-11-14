@@ -1,3 +1,5 @@
+'use server';
+
 import nodemailer from 'nodemailer';
 
 const sendEmail = async (email, subject, message, attachment = null) => {
@@ -23,3 +25,4 @@ const sendEmail = async (email, subject, message, attachment = null) => {
 };
 
 export default sendEmail;
+

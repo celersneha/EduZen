@@ -68,6 +68,14 @@ export async function uploadClassroomSyllabus(formData) {
       };
     }
 
+    // Check if classroom already has a subject BEFORE creating
+    if (classroom.subject) {
+      return {
+        data: null,
+        error: 'This classroom already has a subject. Each classroom can only have one subject.',
+      };
+    }
+
     if (!file) {
       return {
         data: null,
@@ -144,15 +152,17 @@ Return ONLY valid JSON, no markdown, no code blocks, just the JSON object.`,
     const subject = new SubjectModel(syllabusData);
     await subject.save();
 
-    // Update classroom with syllabus
+    // Update classroom with the subject
     await ClassroomModel.findByIdAndUpdate(
       classroomId,
-      { syllabusId: subject._id },
+      { subject: subject._id },
       { new: true }
     );
 
     // Revalidate classroom pages
     revalidatePath(`/classroom/${classroomId}`);
+    revalidatePath(`/classroom/${classroomId}/subject`);
+    revalidatePath("/teacher/dashboard");
 
     return {
       data: {
