@@ -1,0 +1,162 @@
+"use server";
+
+import { getGeminiModel, cleanJsonResponse } from "@/lib/gemini";
+import SubjectModel from "@/models/subject.model";
+import dbConnect from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { revalidatePath } from "next/cache";
+import ClassroomModel from "@/models/classroom.model";
+
+/**
+ * Server action to add a subject by processing a syllabus PDF
+ * @param {FormData} formData - Form data containing PDF file and subject name
+ * @returns {Promise<{data: object | null, error: string | null}>}
+ */
+export async function addSubject(formData) {
+  try {
+    await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    const user = session?.user;
+    if (!user || user.role !== "teacher") {
+      return {
+        data: null,
+        error: "Only teachers can add a subject",
+      };
+    }
+
+
+    const file = formData.get("pdf");
+    const subjectName = formData.get("subjectName");
+
+    if (!subjectName || subjectName.trim() === "") {
+      return {
+        data: null,
+        error: "Subject name is required",
+      };
+    }
+
+    const classroomId = formData.get("classroomId");
+
+    if (!classroomId || classroomId.trim() === "") {
+      return {
+        data: null,
+        error: "Classroom ID is required",
+      };
+    }
+
+    if (!file) {
+      return {
+        data: null,
+        error: "No file uploaded",
+      };
+    }
+
+    // Convert file to buffer and base64
+    const bytes = await file.arrayBuffer();
+    const pdfBuffer = Buffer.from(bytes);
+
+    // Initialize Gemini
+    const model = getGeminiModel('gemini-2.0-flash');
+
+    // Process PDF with Gemini
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          data: pdfBuffer.toString("base64"),
+          mimeType: "application/pdf",
+        },
+      },
+      `You are a syllabus analyzer. Extract the following information from this syllabus PDF:
+
+1. Description: Extract a brief description or overview of the subject
+2. Chapters and Topics: Extract all chapters and their corresponding topics
+
+Format your response as a JSON object with this exact structure:
+{
+  "syllabusDescription": "description here",
+  "chapters": [
+    {
+      "chapterName": "chapter name here",
+      "topics": ["topic 1", "topic 2", "topic 3"]
+    }
+  ]
+}
+
+Important rules:
+1. Return ONLY the JSON object, nothing else
+2. Use double quotes for all strings
+3. Make sure topics is always an array of strings
+4. Do not include any markdown formatting or code blocks
+5. Do not add any explanations or additional text
+6. Ensure the JSON is valid and can be parsed directly
+7. Each topic should be a clear, distinct point from the syllabus
+8. Topics should be extracted in the order they appear in the syllabus
+9. Remove any numbering or bullet points from the topics`,
+    ]);
+
+    const response = await result.response;
+    let text = response.text().trim();
+
+    // Clean up the response string
+    text = cleanJsonResponse(text);
+
+    // Parse the JSON response
+    const syllabusData = JSON.parse(text);
+
+    // Process topics to ensure they are clean and properly formatted
+    syllabusData.chapters = syllabusData.chapters.map((chapter) => ({
+      ...chapter,
+      topics: chapter.topics
+        .map((topic) =>
+          topic
+            .trim()
+            .replace(/^\d+\.\s*/, "") // Remove leading numbers
+            .replace(/^[-•]\s*/, "") // Remove leading bullets
+            .trim()
+        )
+        .filter((topic) => topic.length > 0), // Remove empty topics
+    }));
+
+    // Check if classroom already has a subject BEFORE creating
+    const existingClassroom = await ClassroomModel.findById(classroomId);
+    if (existingClassroom?.subject) {
+      return {
+        data: null,
+        error: 'This classroom already has a subject. Each classroom can only have one subject.',
+      };
+    }
+
+    syllabusData.classroom = classroomId;
+
+    // Add the user-provided subject name and classroomId
+    syllabusData.subjectName = subjectName;
+
+    // Create subject document
+    const subject = new SubjectModel(syllabusData);
+    await subject.save();
+
+    // Update classroom with the subject
+    await ClassroomModel.findByIdAndUpdate(
+      classroomId,
+      { subject: subject._id },
+      { new: true }
+    );
+    // Revalidate relevant paths
+    revalidatePath(`/teacher/classroom/${classroomId}`);
+    revalidatePath(`/teacher/classroom/${classroomId}/subject`);
+    revalidatePath("/teacher/dashboard");
+
+    return {
+      data: syllabusData,
+      error: null,
+    };
+  } catch (error) {
+    console.error("Error processing syllabus:", error);
+    return {
+      data: null,
+      error: "Failed to process syllabus",
+    };
+  }
+}

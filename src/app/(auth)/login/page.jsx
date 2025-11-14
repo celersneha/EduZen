@@ -86,9 +86,14 @@ function LoginContent() {
           content: "Login successful! Redirecting...",
         });
         
-        // Redirect to dashboard or home page
+        // Get user role and redirect to appropriate dashboard
+        const session = await getSession();
+        const dashboardRoute = session?.user?.role === "teacher" 
+          ? "/teacher/dashboard" 
+          : "/student/dashboard";
+        
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push(dashboardRoute);
         }, 1000);
       }
     } catch (error) {
@@ -256,7 +261,7 @@ function LoginContent() {
 
               <div className="text-center pt-4 border-t border-gray-100">
                 <p className="text-sm text-gray-600">
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <Link
                     href="/register"
                     className="font-medium text-blue-600 hover:text-blue-700 transition-colors"

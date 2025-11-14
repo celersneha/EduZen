@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect";
+import dbConnect from "@/lib/db";
 import UserModel from "@/models/user.model";
 import StudentModel from "@/models/student.model";
 import TeacherModel from "@/models/teacher.model";

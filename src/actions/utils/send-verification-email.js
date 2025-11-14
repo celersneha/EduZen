@@ -1,6 +1,6 @@
 'use server';
 
-import sendEmail from './nodemailer-utility';
+import { sendEmail } from '@/lib/nodemailer';
 
 const sendVerificationEmail = async (email, otp) => {
   try {

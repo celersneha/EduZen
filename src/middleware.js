@@ -4,15 +4,8 @@ export { default } from "next-auth/middleware";
 
 export const config = {
   matcher: [
-    "/add-subject",
-    "/attempt-test",
-    "/dashboard",
-    "/show-subjects",
-    "/subject",
-    "/syllabus",
+    "/student/:path*",
     "/teacher/:path*",
-    "/classroom/:path*",
-    "/student/classroom/:path*",
     "/login",
     "/register",
     "/verify/:path*",
@@ -25,36 +18,12 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Protected student routes - require student role
-  const protectedStudentRoutes = [
-    "/add-subject",
-    "/attempt-test",
-    "/show-subjects",
-    "/subject",
-    "/syllabus",
-    "/student/classroom",
-  ];
-
+  const isStudentRoute = pathname.startsWith("/student");
+  
   // Protected teacher routes - require teacher role
-  const protectedTeacherRoutes = [
-    "/teacher",
-  ];
+  const isTeacherRoute = pathname.startsWith("/teacher");
 
-  // Classroom routes - role-based access
-  const classroomRoutes = [
-    "/classroom",
-  ];
-
-  // Check if current path is a protected route
-  const isProtectedStudentRoute = protectedStudentRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
-  const isProtectedTeacherRoute = protectedTeacherRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
-  const isClassroomRoute = classroomRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
-  const isProtectedRoute = isProtectedStudentRoute || isProtectedTeacherRoute || isClassroomRoute;
+  const isProtectedRoute = isStudentRoute || isTeacherRoute;
 
   // Redirect unauthenticated users from protected routes to login
   if (!token && isProtectedRoute) {
@@ -66,31 +35,15 @@ export async function middleware(request) {
     const userRole = token.role;
 
     // Student-only routes
-    if (isProtectedStudentRoute && userRole !== "student") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+    if (isStudentRoute && userRole !== "student") {
+      const dashboardRoute = userRole === "teacher" ? "/teacher/dashboard" : "/login";
+      return NextResponse.redirect(new URL(dashboardRoute, request.url));
     }
 
     // Teacher-only routes
-    if (isProtectedTeacherRoute && userRole !== "teacher") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-
-    // Classroom routes - allow both but redirect based on role
-    // /classroom/join is accessible to students
-    // /classroom/* (management) is for teachers
-    if (isClassroomRoute) {
-      if (pathname.startsWith("/classroom/join") && userRole !== "student") {
-        // Students can access join, but teachers can too (for viewing)
-        // Allow for now, can be restricted later
-      } else if (
-        pathname.startsWith("/classroom/create") ||
-        pathname.startsWith("/classroom/upload") ||
-        pathname.startsWith("/classroom/invite")
-      ) {
-        if (userRole !== "teacher") {
-          return NextResponse.redirect(new URL("/dashboard", request.url));
-        }
-      }
+    if (isTeacherRoute && userRole !== "teacher") {
+      const dashboardRoute = userRole === "student" ? "/student/dashboard" : "/login";
+      return NextResponse.redirect(new URL(dashboardRoute, request.url));
     }
   }
 
@@ -101,15 +54,13 @@ export async function middleware(request) {
       pathname.startsWith("/register") ||
       pathname.startsWith("/verify"))
   ) {
-    const dashboardRoute =
-      token.role === "teacher" ? "/teacher/dashboard" : "/dashboard";
+    const dashboardRoute = token.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard";
     return NextResponse.redirect(new URL(dashboardRoute, request.url));
   }
 
   // Redirect authenticated users from home page to appropriate dashboard
   if (token && pathname === "/") {
-    const dashboardRoute =
-      token.role === "teacher" ? "/teacher/dashboard" : "/dashboard";
+    const dashboardRoute = token.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard";
     return NextResponse.redirect(new URL(dashboardRoute, request.url));
   }
 

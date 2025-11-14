@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import { getClassrooms } from '@/fetchers/get-classrooms';
-import { TeacherDashboardClient } from './teacher-dashboard-client';
+import { getClassrooms } from '@/fetchers/classroom/get-classrooms';
+import { TeacherDashboardClient } from './client';
 
 export const metadata = {
   title: 'Teacher Dashboard | EduZen',
@@ -13,7 +13,7 @@ export default async function TeacherDashboardPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user || session.user.role !== 'teacher') {
-    redirect('/dashboard');
+    redirect('/login');
   }
 
   const { data: classrooms, error } = await getClassrooms();

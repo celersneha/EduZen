@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getGeminiModel, cleanJsonResponse } from "@/lib/gemini";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 
@@ -16,7 +16,7 @@ export async function POST(req) {
 
     const { score, totalQuestions, topic, chapter, difficulty } = await req.json();
 
-    if (score === undefined || !totalQuestions || !topic) {
+    if (score === undefined || !totalQuestions || !chapter) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -24,8 +24,7 @@ export async function POST(req) {
     }
 
     // Initialize Gemini
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = getGeminiModel('gemini-2.0-flash');
 
     const percentage = (score / 10) * 100;
 
@@ -34,7 +33,7 @@ Generate exactly 4 brief remarks about student performance. Total word limit: 40
 
 Test Details:
 - Score: ${score}/${totalQuestions} (${percentage}%)
-- Topic: ${topic}
+${topic ? `- Topic: ${topic}` : '- Scope: Entire Chapter'}
 - Chapter: ${chapter}
 - Difficulty: ${difficulty}
 
@@ -54,8 +53,7 @@ Format: ["point1", "point2", "point3", "point4"]
     let text = response.text().trim();
 
     // Clean up the response
-    text = text.replace(/^```json\s*|\s*```$/g, "");
-    text = text.trim();
+    text = cleanJsonResponse(text);
 
     try {
       const remarks = JSON.parse(text);

@@ -15,8 +15,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { createClassroom } from '@/actions/create-classroom';
-import { generateClassroomCode } from '@/actions/generate-classroom-code';
+import { createClassroom } from '@/actions/classroom/create-classroom';
+import { generateClassroomCode } from '@/actions/classroom/generate-classroom-code';
 
 const formSchema = z.object({
   classroomName: z

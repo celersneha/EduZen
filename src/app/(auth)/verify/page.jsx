@@ -193,7 +193,7 @@ function VerifyContent() {
               Check your email
             </h1>
             <p className="text-gray-600">
-              We've sent a verification code to your inbox
+              We&apos;ve sent a verification code to your inbox
             </p>
           </div>
 
@@ -277,7 +277,7 @@ function VerifyContent() {
 
               {/* Resend section */}
               <div className="pt-4 border-t border-gray-100 text-center space-y-4">
-                <p className="text-sm text-gray-600">Didn't receive the code?</p>
+                <p className="text-sm text-gray-600">Didn&apos;t receive the code?</p>
                 <Button
                   type="button"
                   variant="outline"
@@ -302,7 +302,7 @@ function VerifyContent() {
               {/* Help text */}
               <div className="text-center pt-4 border-t border-gray-100">
                 <p className="text-xs text-gray-500">
-                  Check your spam folder if you don't see the email.{" "}
+                  Check your spam folder if you don&apos;t see the email.{" "}
                   <Link
                     href="/register"
                     className="text-blue-600 hover:underline"

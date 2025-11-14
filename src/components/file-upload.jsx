@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import {
   X,
   File,
   Video,
-  Image,
+  Image as ImageIcon,
   FileText,
   Play,
   Loader2,
@@ -22,6 +23,7 @@ import {
   Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatDuration } from "@/shared/utils/formatters";
 
 /**
  * FileUpload Component
@@ -75,7 +77,7 @@ export function FileUpload({
   // Get file type icon
   const getFileIcon = (fileType) => {
     if (fileType?.startsWith("video/")) return Video;
-    if (fileType?.startsWith("image/")) return Image;
+    if (fileType?.startsWith("image/")) return ImageIcon;
     if (
       fileType?.includes("pdf") ||
       fileType?.includes("document") ||
@@ -96,13 +98,7 @@ export function FileUpload({
     return `${kb.toFixed(2)} KB`;
   };
 
-  // Format video duration
-  const formatDuration = (seconds) => {
-    if (!seconds) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  // Format video duration - using shared utility
 
   // Generate video thumbnail
   const generateVideoThumbnail = (videoFile) => {
@@ -367,10 +363,12 @@ export function FileUpload({
                   }}
                 >
                   {thumbnail || existingFile?.thumbnailUrl ? (
-                    <img
+                    <Image
                       src={thumbnail || existingFile.thumbnailUrl}
                       alt="Video thumbnail"
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   ) : (
                     <video
@@ -391,11 +389,15 @@ export function FileUpload({
                   )}
                 </div>
               ) : fileType?.startsWith("image/") ? (
-                <div className="relative">
-                  <img
+                <div className="relative w-full flex items-center justify-center" style={{ minHeight: '200px', maxHeight: '384px' }}>
+                  <Image
                     src={preview || existingFile?.url || existingFile?.thumbnailUrl}
                     alt="Preview"
-                    className="w-full h-auto max-h-96 object-contain"
+                    width={800}
+                    height={600}
+                    className="object-contain max-w-full max-h-96 w-auto h-auto"
+                    unoptimized
+                    style={{ maxHeight: '384px' }}
                   />
                 </div>
               ) : (

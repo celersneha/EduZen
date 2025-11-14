@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { createSubject } from '@/actions/create-subject';
+import { createSubject } from '@/actions/subject/create-subject';
 
 const formSchema = z.object({
   subjectName: z.string().min(2, 'Subject name must be at least 2 characters'),

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import dbConnect from "@/lib/dbConnect";
+import { getGeminiModel, cleanJsonResponse } from "@/lib/gemini";
+import dbConnect from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 import SubjectModel from "@/models/subject.model";
@@ -25,9 +25,9 @@ export async function POST(req) {
       questionCount = 10,
     } = await req.json();
 
-    if (!subjectID || !chapter || !topic) {
+    if (!subjectID || !chapter) {
       return NextResponse.json(
-        { error: "Subject ID, chapter, and topic are required" },
+        { error: "Subject ID and chapter are required" },
         { status: 400 }
       );
     }
@@ -42,24 +42,29 @@ export async function POST(req) {
     }
 
     // Initialize Gemini
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = getGeminiModel('gemini-2.0-flash');
+
+    // Build prompt based on whether topic is provided
+    const topicContext = topic 
+      ? `Topic: ${topic}\nPlease generate ${questionCount} multiple-choice questions based on the given topic. Each question should be relevant to the topic "${topic}" from chapter "${chapter}".`
+      : `Please generate ${questionCount} multiple-choice questions covering the entire chapter "${chapter}". Questions should cover various topics and concepts within this chapter.`;
 
     const prompt = `
 Generate a quiz for the following educational content:
 
 Subject: ${subject.subjectName}
 Chapter: ${chapter}
-Topic: ${topic}
+${topic ? `Topic: ${topic}` : 'Scope: Entire Chapter'}
 Difficulty Level: ${difficulty}
 Number of Questions: ${questionCount}
 
-Please generate ${questionCount} multiple-choice questions based on the given topic. Each question should:
-1. Be relevant to the topic "${topic}" from chapter "${chapter}"
-2. Have 4 options (A, B, C, D)
-3. Have exactly one correct answer
-4. Be at ${difficulty} difficulty level
-5. Test understanding, not just memorization
+${topicContext}
+Each question should:
+1. Have 4 options (A, B, C, D)
+2. Have exactly one correct answer
+3. Be at ${difficulty} difficulty level
+4. Test understanding, not just memorization
+${topic ? '' : '5. Cover different topics and concepts within the chapter to provide comprehensive coverage'}
 
 Format your response as a JSON object with this exact structure:
 {
@@ -80,6 +85,7 @@ Important rules:
 5. Questions should be educational and appropriate
 6. Avoid trick questions or ambiguous wording
 7. Each question should have a clear, definitive correct answer
+${topic ? '' : '8. Distribute questions across different topics within the chapter for comprehensive assessment'}
 `;
 
     const result = await model.generateContent(prompt);
@@ -87,9 +93,7 @@ Important rules:
     let text = response.text().trim();
 
     // Clean up the response
-    text = text.replace(/^```json\s*|\s*```$/g, "");
-    text = text.replace(/^["']|["']$/g, "");
-    text = text.trim();
+    text = cleanJsonResponse(text);
 
     try {
       const quizData = JSON.parse(text);
@@ -124,7 +128,7 @@ Important rules:
         metadata: {
           subject: subject.subjectName,
           chapter,
-          topic,
+          topic: topic || null,
           difficulty,
           questionCount: quizData.questions.length,
         },

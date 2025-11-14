@@ -14,7 +14,8 @@ import {
   getNotificationsAction,
   markNotificationRead,
   markAllNotificationsRead,
-} from '@/actions/mark-notification-read';
+} from '@/actions/notification/mark-notification-read';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
 // Helper function to format date as "X time ago"
@@ -49,6 +50,7 @@ const formatTimeAgo = (date) => {
  */
 export function NotificationBell() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,12 +95,8 @@ export function NotificationBell() {
         console.error('Error marking notification as read:', error);
         return;
       }
-      // Update local state
-      setNotifications((prev) =>
-        prev.map((notif) =>
-          notif.id === notificationId ? { ...notif, isRead: true } : notif
-        )
-      );
+      // Remove notification from list when marked as read (for cleaner UI)
+      setNotifications((prev) => prev.filter((notif) => notif.id !== notificationId));
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -113,10 +111,8 @@ export function NotificationBell() {
         console.error('Error marking all notifications as read:', error);
         return;
       }
-      // Update local state
-      setNotifications((prev) =>
-        prev.map((notif) => ({ ...notif, isRead: true }))
-      );
+      // Clear all notifications from the list when all are marked as read
+      setNotifications([]);
       setUnreadCount(0);
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -256,7 +252,7 @@ export function NotificationBell() {
             <DropdownMenuSeparator />
             <div className="p-2">
               <Link
-                href="/notifications"
+                href={session?.user?.role === 'teacher' ? '/teacher/notifications' : '/student/notifications'}
                 className="block text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setIsOpen(false)}
               >

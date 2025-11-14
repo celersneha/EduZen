@@ -15,8 +15,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { uploadVideoLecture } from '@/actions/upload-video-lecture';
-import { getSyllabusAction } from '@/actions/get-syllabus';
+import { uploadVideoLecture } from '@/actions/subject/upload-video-lecture';
+import { getSyllabusAction } from '@/actions/subject/get-syllabus';
 
 export function Step5UploadLecture({
   formData,

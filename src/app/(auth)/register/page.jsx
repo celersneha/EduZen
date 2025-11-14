@@ -272,7 +272,7 @@ export default function RegisterPage() {
 
               {/* Features list */}
               <div className="pt-4 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-3 text-center">What you'll get:</p>
+                <p className="text-xs text-gray-500 mb-3 text-center">What you&apos;ll get:</p>
                 <div className="space-y-2">
                   <div className="flex items-center text-sm text-gray-600">
                     <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />

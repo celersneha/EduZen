@@ -1,7 +1,8 @@
-import dbConnect from "@/lib/dbConnect";
+import dbConnect from "@/lib/db";
 import SubjectModel from "@/models/subject.model";
 import StudentModel from "@/models/student.model";
 import TestModel from "@/models/test.model";
+import ClassroomModel from "@/models/classroom.model";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 

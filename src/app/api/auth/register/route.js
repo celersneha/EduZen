@@ -1,5 +1,5 @@
 import sendVerificationEmail from "@/actions/utils/send-verification-email";
-import dbConnect from "@/lib/dbConnect";
+import dbConnect from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import UserModel from "@/models/user.model";

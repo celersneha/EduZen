@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { inviteStudents } from '@/actions/invite-students';
+import { inviteStudents } from '@/actions/classroom/invite-students';
 
 export function Step4InviteStudents({
   formData,

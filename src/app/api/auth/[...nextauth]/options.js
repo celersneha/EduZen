@@ -1,6 +1,6 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import dbConnect from "@/lib/dbConnect";
+import dbConnect from "@/lib/db";
 import sendVerificationEmail from "@/actions/utils/send-verification-email";
 import UserModel from "@/models/user.model";
 

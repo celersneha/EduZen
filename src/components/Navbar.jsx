@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,12 +30,19 @@ export function Navbar() {
             session
               ? session.user?.role === "teacher"
                 ? "/teacher/dashboard"
-                : "/dashboard"
+                : "/student/dashboard"
               : "/"
           }
         >
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg p-2 cursor-pointer hover:shadow-lg transition-shadow">
-            <span className="text-xl">EduZen</span>
+          <div className="cursor-pointer hover:opacity-80 transition-opacity">
+            <Image
+              src="/eduzen-logo.png"
+              alt="EduZen Logo"
+              width={120}
+              height={40}
+              className="h-10 w-auto"
+              priority
+            />
           </div>
         </Link>
       </div>
@@ -46,7 +54,7 @@ export function Navbar() {
             href={
               session.user?.role === "teacher"
                 ? "/teacher/dashboard"
-                : "/dashboard"
+                : "/student/dashboard"
             }
             className="text-gray-600 hover:text-gray-900 transition-colors"
           >
@@ -64,16 +72,10 @@ export function Navbar() {
           ) : (
             <>
               <Link
-                href="/classroom/list"
+                href="/student-classroom/list"
                 className="text-gray-600 hover:text-gray-900 transition-colors"
               >
                 My Classrooms
-              </Link>
-              <Link
-                href="/show-subjects"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                My Subjects
               </Link>
             </>
           )}
@@ -119,7 +121,7 @@ export function Navbar() {
                   href={
                     session.user?.role === "teacher"
                       ? "/teacher/dashboard"
-                      : "/dashboard"
+                      : "/student/dashboard"
                   }
                   className="cursor-pointer"
                 >
@@ -139,15 +141,9 @@ export function Navbar() {
               ) : (
                 <>
                   <DropdownMenuItem asChild>
-                    <Link href="/classroom/list" className="cursor-pointer">
+                    <Link href="/student-classroom/list" className="cursor-pointer">
                       <BookOpen className="mr-2 h-4 w-4" />
                       My Classrooms
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/show-subjects" className="cursor-pointer">
-                      <BookOpen className="mr-2 h-4 w-4" />
-                      My Subjects
                     </Link>
                   </DropdownMenuItem>
                 </>
