@@ -106,7 +106,7 @@ export function CreateClassroomClient() {
   };
 
   const handleFinish = () => {
-    router.push(`/classroom/${classroomId}`);
+    router.push(`/teacher/classroom/${classroomId}`);
   };
 
   const handleSkip = () => {

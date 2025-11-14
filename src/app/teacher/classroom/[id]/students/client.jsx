@@ -66,7 +66,7 @@ export function ClassroomStudentsClient({ classroom, students = [] }) {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <Link href={`/classroom/${classroom?.id}`}>
+          <Link href={`/teacher/classroom/${classroom?.id}`}>
             <Button variant="ghost" className="mb-4">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Classroom
@@ -143,7 +143,7 @@ export function ClassroomStudentsClient({ classroom, students = [] }) {
                 <p className="text-gray-600 mb-6">
                   Invite students to join this classroom to see their progress here.
                 </p>
-                <Link href={`/classroom/${classroom?.id}`}>
+                <Link href={`/teacher/classroom/${classroom?.id}`}>
                   <Button variant="gradient">
                     Invite Students
                   </Button>

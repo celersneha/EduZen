@@ -127,7 +127,7 @@ export function TeacherDashboardClient({ classrooms, error, userName }) {
         {/* Classrooms List */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">My Classrooms</h2>
-          <Link href="/classroom/create">
+          <Link href="/teacher/classroom/create">
             <Button variant="gradient">
               <Plus className="mr-2 h-4 w-4" />
               New Classroom
@@ -210,7 +210,7 @@ export function TeacherDashboardClient({ classrooms, error, userName }) {
                       )}
                     </div>
 
-                    <Link href={`/classroom/${classroom.id}`}>
+                    <Link href={`/teacher/classroom/${classroom.id}`}>
                       <Button className="w-full" variant="outline">
                         Manage Classroom
                         <ArrowRight className="ml-2 h-4 w-4" />

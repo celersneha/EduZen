@@ -188,7 +188,7 @@ export function ClassroomDetailClient({
                     {classroom.studentCount || 0}
                   </span>
                   {classroom.studentCount > 0 && (
-                    <Link href={`/classroom/${classroom.id}/students`}>
+                    <Link href={`/teacher/classroom/${classroom.id}/students`}>
                       <Button variant="outline" size="sm">
                         View Students
                         <ArrowRight className="ml-2 h-4 w-4" />
@@ -271,7 +271,7 @@ export function ClassroomDetailClient({
         {!classroom.subject ? (
           <Card
             className="mb-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-2xl rounded-2xl overflow-hidden cursor-pointer"
-            onClick={() => router.push(`/classroom/${classroom.id}/add-subject`)}
+            onClick={() => router.push(`/teacher/classroom/${classroom.id}/add-subject`)}
           >
             <CardContent className="pt-6 flex items-center justify-between">
               <div>
@@ -292,7 +292,7 @@ export function ClassroomDetailClient({
         ) : (
           <Card
             className="mb-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-2xl rounded-2xl overflow-hidden cursor-pointer"
-            onClick={() => router.push(`/classroom/${classroom.id}/subject`)}
+            onClick={() => router.push(`/teacher/classroom/${classroom.id}/subject`)}
           >
             <CardContent className="pt-6 flex items-center justify-between">
               <div className="flex-1">

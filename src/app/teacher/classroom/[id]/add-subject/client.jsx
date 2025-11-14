@@ -70,7 +70,7 @@ export function AddSubjectClient({ classroomId }) {
 
       toast.success("Subject added successfully!");
       form.reset();
-      router.push(`/classroom/${classroomId}/subject`);
+      router.push(`/teacher/classroom/${classroomId}/subject`);
     } catch (err) {
       console.error("Error uploading syllabus:", err);
       toast.error(err.message || "Failed to upload syllabus");

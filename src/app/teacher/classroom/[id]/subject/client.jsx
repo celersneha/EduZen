@@ -156,7 +156,7 @@ export function ClassroomSubjectClient({
       <div className="border-b border-slate-200/60 bg-white/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href={`/classroom/${classroomId}`}>
+            <Link href={`/teacher/classroom/${classroomId}`}>
               <Button 
                 variant="ghost" 
                 className="text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors -ml-2"
@@ -193,7 +193,7 @@ export function ClassroomSubjectClient({
                     size="lg"
                     className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transition-all duration-200 px-8 h-12 text-base font-semibold"
                     onClick={() =>
-                      router.push(`/classroom/${classroomId}/add-subject`)
+                      router.push(`/teacher/classroom/${classroomId}/add-subject`)
                     }
                   >
                     <Sparkles className="mr-2 h-5 w-5" />
