@@ -41,11 +41,11 @@ export function Step2SubjectDetails({
   const onSubmit = (values) => {
     // Just store the subject details in formData, don't create subject yet
     // Subject will be created in Step 3 when syllabus is uploaded
-    onComplete({
-      subjectName: values.subjectName,
-      subjectDescription: values.subjectDescription,
-    });
-    onNext();
+      onComplete({
+        subjectName: values.subjectName,
+        subjectDescription: values.subjectDescription,
+      });
+      onNext();
   };
 
   return (
@@ -90,13 +90,13 @@ export function Step2SubjectDetails({
         />
 
         <div className="flex justify-end pt-4">
-            <Button
+          <Button
             type="submit"
             disabled={isLoading}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
-            Continue
-            <ArrowRight className="ml-2 h-4 w-4" />
+                Continue
+                <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </form>

@@ -4,12 +4,13 @@ import dbConnect from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 import TestModel from '@/models/test.model';
+import StudentModel from '@/models/student.model';
 import { revalidatePath } from 'next/cache';
 
 /**
  * Server action to save a test result
  * @param {object} testData - Test result data
- * @param {string} testData.studentId - Student ID
+ * @param {string} testData.studentId - User ID (will be converted to Student model ID)
  * @param {string} testData.subjectId - Subject ID
  * @param {string} testData.chapterName - Chapter name
  * @param {string} testData.topicName - Topic name
@@ -30,7 +31,7 @@ export async function saveTestResult(testData) {
     }
 
     const {
-      studentId,
+      studentId, // This is actually the User ID from session
       subjectId,
       chapterName,
       topicName,
@@ -46,9 +47,18 @@ export async function saveTestResult(testData) {
       };
     }
 
-    // Create new test record
+    // Convert User ID to Student model ID
+    const student = await StudentModel.findOne({ userId: studentId });
+    if (!student) {
+      return {
+        data: null,
+        error: 'Student record not found',
+      };
+    }
+
+    // Create new test record with Student model ID
     const testResult = new TestModel({
-      studentId,
+      studentId: student._id, // Use Student model ID, not User ID
       subject: subjectId,
       chapterName,
       topicName,

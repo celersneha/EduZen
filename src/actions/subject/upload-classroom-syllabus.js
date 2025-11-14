@@ -74,10 +74,10 @@ export async function uploadClassroomSyllabus(formData) {
       // Verify that the subject actually exists in the database
       const existingSubject = await SubjectModel.findById(classroom.subject);
       if (existingSubject) {
-        return {
-          data: null,
-          error: 'This classroom already has a subject. Each classroom can only have one subject.',
-        };
+      return {
+        data: null,
+        error: 'This classroom already has a subject. Each classroom can only have one subject.',
+      };
       }
       // If subject reference exists but subject doesn't exist, clean up the reference
       await ClassroomModel.findByIdAndUpdate(classroomId, { $unset: { subject: 1 } });
