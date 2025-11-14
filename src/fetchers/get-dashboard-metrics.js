@@ -24,10 +24,10 @@ export async function getDashboardMetrics() {
     }
 
 
-    const studentId = user.id;
+    const userId = user.id; // This is the User ID from session
 
     // Get student with populated classrooms
-    const student = await StudentModel.findOne({ userId: studentId }).populate(
+    const student = await StudentModel.findOne({ userId: userId }).populate(
       "classrooms"
     );
 
@@ -38,6 +38,9 @@ export async function getDashboardMetrics() {
         error: "Student not found",
       };
     }
+
+    // Get the Student model ID (not User ID)
+    const studentId = student._id;
 
     // Get all subjects from student's classrooms
     const classroomIds = student.classrooms?.map((c) => c._id) || [];
@@ -64,7 +67,7 @@ export async function getDashboardMetrics() {
       );
     }, 0);
 
-    // Fetch all tests for this student
+    // Fetch all tests for this student using Student model ID (not User ID)
     const tests = await TestModel.find({ studentId }).sort({ createdAt: 1 });
 
     // Calculate subject performance based on test scores
