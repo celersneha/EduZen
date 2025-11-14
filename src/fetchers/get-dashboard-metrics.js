@@ -23,7 +23,6 @@ export async function getDashboardMetrics() {
       };
     }
 
-
     const userId = user.id; // This is the User ID from session
 
     // Get student with populated classrooms
@@ -44,9 +43,59 @@ export async function getDashboardMetrics() {
 
     // Get all subjects from student's classrooms
     const classroomIds = student.classrooms?.map((c) => c._id) || [];
-    const subjects = await SubjectModel.find({
+    
+    // Method 1: Find subjects where classroom field matches
+    let subjectsRaw = await SubjectModel.find({
       classroom: { $in: classroomIds },
-    });
+    }).lean();
+    
+    // Method 2: Also check if classrooms have subject references
+    const classroomsWithSubjects = await ClassroomModel.find({
+      _id: { $in: classroomIds },
+      subject: { $exists: true, $ne: null }
+    }).select('subject').lean();
+    
+    const classroomSubjectIds = classroomsWithSubjects
+      .map(c => c.subject?.toString())
+      .filter(Boolean)
+      .filter((id, index, self) => self.indexOf(id) === index); // Unique IDs only
+    
+    if (classroomSubjectIds.length > 0) {
+      const classroomSubjectsRaw = await SubjectModel.find({
+        _id: { $in: classroomSubjectIds },
+      }).lean();
+      
+      // Merge with existing subjects, avoiding duplicates
+      const existingSubjectIds = new Set(subjectsRaw.map(s => s._id.toString()));
+      const uniqueClassroomSubjects = classroomSubjectsRaw.filter(s => !existingSubjectIds.has(s._id.toString()));
+      subjectsRaw = [...subjectsRaw, ...uniqueClassroomSubjects];
+    }
+    
+    // Method 3: Also fetch subjects that are referenced in tests (in case classroom field doesn't match)
+    const tests = await TestModel.find({ studentId }).sort({ createdAt: 1 });
+    const testSubjectIds = tests
+      .map(t => t.subject?.toString())
+      .filter(Boolean)
+      .filter((id, index, self) => self.indexOf(id) === index); // Unique IDs only
+    
+    if (testSubjectIds.length > 0) {
+      const testSubjectsRaw = await SubjectModel.find({
+        _id: { $in: testSubjectIds },
+      }).lean();
+      
+      // Merge with existing subjects, avoiding duplicates
+      const existingSubjectIds = new Set(subjectsRaw.map(s => s._id.toString()));
+      const uniqueTestSubjects = testSubjectsRaw.filter(s => !existingSubjectIds.has(s._id.toString()));
+      subjectsRaw = [...subjectsRaw, ...uniqueTestSubjects];
+    }
+    
+    // Ensure classroom field is available as string for matching
+    const subjects = subjectsRaw.map((subject) => ({
+      ...subject,
+      _id: subject._id.toString(),
+      classroom: subject.classroom?.toString() || subject.classroom,
+    }));
+    
     const totalSubjects = subjects.length;
 
     // Calculate real metrics from actual data
@@ -67,14 +116,45 @@ export async function getDashboardMetrics() {
       );
     }, 0);
 
-    // Fetch all tests for this student using Student model ID (not User ID)
-    const tests = await TestModel.find({ studentId }).sort({ createdAt: 1 });
+    // Tests already fetched above for subject lookup
+
+    // Create a mapping of all possible IDs to subjects for matching
+    const idToSubjectMap = {};
+    subjects.forEach((subject) => {
+      const subjectId = subject._id?.toString();
+      if (subjectId) {
+        idToSubjectMap[subjectId] = subject;
+      }
+      // Also map classroom ID to subject if available
+      if (subject.classroom) {
+        const classroomId = subject.classroom.toString();
+        idToSubjectMap[classroomId] = subject;
+      }
+    });
 
     // Calculate subject performance based on test scores
     const subjectPerformanceData = subjects.map((subject) => {
-      const subjectTests = tests.filter(
-        (test) => test.subject.toString() === subject._id.toString()
-      );
+      // Match tests by Subject ID first, then fallback to classroom ID if needed
+      const subjectTests = tests.filter((test) => {
+        const testSubjectId = test.subject?.toString();
+        if (!testSubjectId) return false;
+        
+        const subjectId = subject._id?.toString();
+        
+        // Direct match by Subject ID
+        if (testSubjectId === subjectId) {
+          return true;
+        }
+        
+        // Fallback: check if test.subject matches this subject's classroom ID
+        // This handles cases where tests might have been saved with classroomId
+        const classroomId = subject.classroom?.toString();
+        if (classroomId && testSubjectId === classroomId) {
+          return true;
+        }
+        
+        return false;
+      });
 
       // Use testScore field (0-10 scale) and convert to percentage
       const avgScore =
@@ -133,19 +213,29 @@ export async function getDashboardMetrics() {
     );
 
     // Score progression over time
-    const scoreProgressData = tests.map((test, index) => ({
-      testNumber: index + 1,
-      score: (test.testScore || 0) * 10, // Convert 0-10 to 0-100 for display
-      date: new Date(test.createdAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
-      subject:
-        subjects.find((s) => s._id.toString() === test.subject.toString())
-          ?.subjectName || "Unknown",
-      chapter: test.chapterName || "Unknown Chapter",
-      topic: test.topicName || "Unknown Topic",
-    }));
+    const scoreProgressData = tests.map((test, index) => {
+      const testSubjectId = test.subject?.toString();
+      
+      // Try to find subject by direct ID match or by classroom ID
+      const matchedSubject = subjects.find((s) => {
+        return (
+          s._id.toString() === testSubjectId ||
+          (s.classroom && s.classroom.toString() === testSubjectId)
+        );
+      });
+      
+      return {
+        testNumber: index + 1,
+        score: (test.testScore || 0) * 10, // Convert 0-10 to 0-100 for display
+        date: new Date(test.createdAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
+        subject: matchedSubject?.subjectName || "Unknown",
+        chapter: test.chapterName || "Unknown Chapter",
+        topic: test.topicName || "Unknown Topic",
+      };
+    });
 
     // Content mastery based on test performance
     const avgTestScore =
