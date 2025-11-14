@@ -83,7 +83,7 @@ export function StudentClassroomsClient({ classrooms, error }) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <Link href={`/student-classroom/${classroom.id}`}>
+                    <Link href={`/student/student-classroom/${classroom.id}`}>
                       <Button className="w-full" variant="outline">
                         View Classroom
                         <ArrowRight className="ml-2 h-4 w-4" />

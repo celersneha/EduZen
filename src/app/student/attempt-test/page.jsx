@@ -55,86 +55,10 @@ function AttemptTestPageContent() {
   const topic = searchParams.get("topic");
   const difficulty = searchParams.get("difficulty") || "medium";
 
-  // Timer effect
-  useEffect(() => {
-    if (testStarted && !testCompleted && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            // Time is about to expire, submit test
-            setTimeout(() => {
-              handleSubmitTest();
-            }, 0);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [testStarted, testCompleted, timeLeft, handleSubmitTest]);
-
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const handleStartTest = async () => {
-    if (!session?.user) {
-      toast.error("Please login to attempt the test");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch("/api/generate-quiz", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          subjectID,
-          chapter,
-          topic,
-          difficulty: difficulty,
-          questionCount: 10,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate questions");
-      }
-
-      const data = await response.json();
-      setQuestions(data.questions);
-      setTestStarted(true);
-      toast.success("Test started! Good luck!");
-    } catch (error) {
-      console.error("Error starting test:", error);
-      toast.error("Failed to start test. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAnswerSelect = (questionIndex, answerIndex) => {
-    setSelectedAnswers({
-      ...selectedAnswers,
-      [questionIndex]: answerIndex,
-    });
-  };
-
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    }
-  };
-
-  const handlePrevQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
-    }
   };
 
   const calculateScore = useCallback(() => {
@@ -200,6 +124,82 @@ function AttemptTestPageContent() {
       toast.error("Test completed but failed to save results");
     }
   }, [testCompleted, calculateScore, questions.length, topic, chapter, difficulty, session?.user?.id, subjectID]);
+
+  // Timer effect
+  useEffect(() => {
+    if (testStarted && !testCompleted && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            // Time is about to expire, submit test
+            setTimeout(() => {
+              handleSubmitTest();
+            }, 0);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [testStarted, testCompleted, timeLeft, handleSubmitTest]);
+
+  const handleStartTest = async () => {
+    if (!session?.user) {
+      toast.error("Please login to attempt the test");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch("/api/generate-quiz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subjectID,
+          chapter,
+          topic,
+          difficulty: difficulty,
+          questionCount: 10,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate questions");
+      }
+
+      const data = await response.json();
+      setQuestions(data.questions);
+      setTestStarted(true);
+      toast.success("Test started! Good luck!");
+    } catch (error) {
+      console.error("Error starting test:", error);
+      toast.error("Failed to start test. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAnswerSelect = (questionIndex, answerIndex) => {
+    setSelectedAnswers({
+      ...selectedAnswers,
+      [questionIndex]: answerIndex,
+    });
+  };
+
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
+
+  const handlePrevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
 
 
   const generateExplanation = async (questionIndex) => {
@@ -425,7 +425,7 @@ function AttemptTestPageContent() {
                   <Button
                     onClick={() =>
                       router.push(
-                        `/subject?${classroomId ? `classroomId=${classroomId}` : `subjectID=${subjectID}`}`
+                        `/student/subject?${classroomId ? `classroomId=${classroomId}` : `subjectID=${subjectID}`}`
                       )
                     }
                     className="h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl"
@@ -635,7 +635,7 @@ function AttemptTestPageContent() {
             <Button
               onClick={() =>
                 router.push(
-                  `/subject?${classroomId ? `classroomId=${classroomId}` : `subjectID=${subjectID}`}`
+                  `/student/subject?${classroomId ? `classroomId=${classroomId}` : `subjectID=${subjectID}`}`
                 )
               }
               className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl"
