@@ -4,7 +4,7 @@ import { sendEmail } from '@/lib/nodemailer';
 
 const sendClassroomInvite = async (studentEmail, classroomName, classroomCode, teacherName) => {
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-  const joinLink = `${baseUrl}/student-classroom/join?code=${classroomCode}`;
+  const joinLink = `${baseUrl}/student/student-classroom/join?code=${classroomCode}`;
 
   const subject = `Join ${classroomName} on EduZen`;
 

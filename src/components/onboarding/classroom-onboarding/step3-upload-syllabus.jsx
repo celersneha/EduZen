@@ -14,7 +14,6 @@ export function Step3UploadSyllabus({
   onComplete,
   onNext,
   classroomId,
-  subjectId,
   isLoading,
   setIsLoading,
 }) {
@@ -40,8 +39,13 @@ export function Step3UploadSyllabus({
       return;
     }
 
-    if (!classroomId || !subjectId) {
-      toast.error('Classroom or subject information is missing');
+    if (!classroomId) {
+      toast.error('Classroom information is missing');
+      return;
+    }
+
+    if (!formData.subjectName) {
+      toast.error('Subject name is missing. Please go back and fill in subject details.');
       return;
     }
 
@@ -50,8 +54,12 @@ export function Step3UploadSyllabus({
       const formDataObj = new FormData();
       formDataObj.append('pdf', file);
       formDataObj.append('subjectName', formData.subjectName);
+      if (formData.subjectDescription) {
+        formDataObj.append('subjectDescription', formData.subjectDescription);
+      }
       formDataObj.append('classroomId', classroomId);
 
+      // This will create the subject with the syllabus
       const { data, error } = await uploadClassroomSyllabus(formDataObj);
 
       if (error) {
@@ -61,7 +69,7 @@ export function Step3UploadSyllabus({
 
       setPreview(data.subject);
       onComplete({ syllabusData: data.subject });
-      toast.success('Syllabus processed successfully!');
+      toast.success('Subject and syllabus created successfully!');
     } catch (error) {
       console.error('Error uploading syllabus:', error);
       toast.error('Failed to process syllabus');

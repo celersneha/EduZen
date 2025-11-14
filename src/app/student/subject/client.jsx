@@ -110,7 +110,7 @@ export function SubjectClient({ subject, subjectID }) {
               access.
             </p>
             <Button
-              onClick={() => router.push('/student-classroom/list')}
+              onClick={() => router.push('/student/student-classroom/list')}
               className="w-full"
             >
               Go back to classrooms
@@ -135,7 +135,7 @@ export function SubjectClient({ subject, subjectID }) {
         >
           <Button
             variant="ghost"
-            onClick={() => router.push('/student-classroom/list')}
+            onClick={() => router.push('/student/student-classroom/list')}
             className="mb-6 hover:bg-white/80 backdrop-blur-sm"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

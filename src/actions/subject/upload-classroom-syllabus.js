@@ -39,6 +39,7 @@ export async function uploadClassroomSyllabus(formData) {
 
     const file = formData.get("pdf");
     const subjectName = formData.get("subjectName");
+    const subjectDescription = formData.get("subjectDescription");
     const classroomId = formData.get("classroomId");
 
     if (!subjectName || subjectName.trim() === "") {
@@ -70,10 +71,18 @@ export async function uploadClassroomSyllabus(formData) {
 
     // Check if classroom already has a subject BEFORE creating
     if (classroom.subject) {
-      return {
-        data: null,
-        error: 'This classroom already has a subject. Each classroom can only have one subject.',
-      };
+      // Verify that the subject actually exists in the database
+      const existingSubject = await SubjectModel.findById(classroom.subject);
+      if (existingSubject) {
+        return {
+          data: null,
+          error: 'This classroom already has a subject. Each classroom can only have one subject.',
+        };
+      }
+      // If subject reference exists but subject doesn't exist, clean up the reference
+      await ClassroomModel.findByIdAndUpdate(classroomId, { $unset: { subject: 1 } });
+      // Update the classroom object for subsequent code
+      classroom.subject = null;
     }
 
     if (!file) {
@@ -139,8 +148,12 @@ Return ONLY valid JSON, no markdown, no code blocks, just the JSON object.`,
         .filter((topic) => topic.length > 0), // Remove empty topics
     }));
 
-    // Add the user-provided subject name
+    // Add the user-provided subject name and description
     syllabusData.subjectName = subjectName;
+    // Use user-provided description if available, otherwise use the extracted one
+    if (subjectDescription && subjectDescription.trim() !== "") {
+      syllabusData.subjectDescription = subjectDescription.trim();
+    }
 
     // Create subject document
     const subject = new SubjectModel(syllabusData);

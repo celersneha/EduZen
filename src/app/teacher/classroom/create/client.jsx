@@ -149,7 +149,6 @@ export function CreateClassroomClient() {
             onComplete={handleStepComplete}
             onNext={handleNext}
             classroomId={classroomId}
-            subjectId={subjectId}
             isLoading={isLoading}
             setIsLoading={setIsLoading}
           />

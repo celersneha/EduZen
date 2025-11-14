@@ -3,8 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { toast } from 'sonner';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -16,7 +15,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { createSubject } from '@/actions/subject/create-subject';
 
 const formSchema = z.object({
   subjectName: z.string().min(2, 'Subject name must be at least 2 characters'),
@@ -40,39 +38,14 @@ export function Step2SubjectDetails({
     },
   });
 
-  const onSubmit = async (values) => {
-    if (!classroomId) {
-      toast.error('Classroom ID is missing');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const formDataObj = new FormData();
-      formDataObj.append('subjectName', values.subjectName);
-      formDataObj.append('subjectDescription', values.subjectDescription || '');
-      formDataObj.append('classroomId', classroomId);
-
-      const { data, error } = await createSubject(formDataObj);
-
-      if (error) {
-        toast.error(error);
-        return;
-      }
-
-      setSubjectId(data.subject.id);
-      onComplete({
-        subjectName: values.subjectName,
-        subjectDescription: values.subjectDescription,
-      });
-      toast.success('Subject created successfully!');
-      onNext();
-    } catch (error) {
-      console.error('Error creating subject:', error);
-      toast.error('Failed to create subject');
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (values) => {
+    // Just store the subject details in formData, don't create subject yet
+    // Subject will be created in Step 3 when syllabus is uploaded
+    onComplete({
+      subjectName: values.subjectName,
+      subjectDescription: values.subjectDescription,
+    });
+    onNext();
   };
 
   return (
@@ -117,22 +90,13 @@ export function Step2SubjectDetails({
         />
 
         <div className="flex justify-end pt-4">
-          <Button
+            <Button
             type="submit"
             disabled={isLoading}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <>
-                Continue
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </>
-            )}
+            Continue
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </form>

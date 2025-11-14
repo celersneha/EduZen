@@ -114,7 +114,7 @@ export async function inviteStudents(classroomId, studentEmails) {
               isRead: false,
               classroomId: classroom._id,
               classroomCode: classroom.classroomCode,
-              actionUrl: `/student-classroom/join?code=${classroom.classroomCode}`,
+              actionUrl: `/student/student-classroom/join?code=${classroom.classroomCode}`,
               metadata: {
                 teacherName,
                 classroomName: classroom.classroomName,

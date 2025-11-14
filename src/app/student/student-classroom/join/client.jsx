@@ -53,7 +53,7 @@ export function JoinClassroomClient({ initialCode }) {
       }
 
       toast.success('Successfully joined classroom!');
-      router.push('/student-classroom/list');
+      router.push('/student/student-classroom/list');
     } catch (error) {
       console.error('Error joining classroom:', error);
       toast.error('Failed to join classroom');
