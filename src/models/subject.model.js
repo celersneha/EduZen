@@ -19,10 +19,11 @@ const subjectSchema = new mongoose.Schema(
     subjectDescription: {
       type: String,
     },
-    student: {
+    classroom: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Student",
+      ref: "Classroom",
     },
+
     chapters: [chapterSchema],
   },
   {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getGeminiModel } from "@/lib/gemini";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 
@@ -24,8 +24,7 @@ export async function POST(req) {
     }
 
     // Initialize Gemini
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = getGeminiModel('gemini-2.0-flash');
 
     const prompt = `
 Generate a concise explanation for this quiz question. Keep it exactly 40 words.
@@ -34,7 +33,7 @@ Question: ${question}
 Options: ${options.map((opt, idx) => `${idx}: ${opt}`).join(', ')}
 User's Answer: ${userAnswer !== undefined ? options[userAnswer] : 'Not answered'}
 Correct Answer: ${options[correctAnswer]}
-Topic: ${topic}
+${topic ? `Topic: ${topic}` : 'Context: General chapter content'}
 
 Explain:
 1. Why the correct answer is right

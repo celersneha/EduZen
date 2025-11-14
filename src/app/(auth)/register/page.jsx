@@ -16,6 +16,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle, ArrowRight, UserPlus } from "lucide-react";
@@ -25,6 +32,9 @@ const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  role: z.enum(["student", "teacher"], {
+    required_error: "Please select a role",
+  }),
 });
 
 export default function RegisterPage() {
@@ -39,6 +49,7 @@ export default function RegisterPage() {
       email: "",
       username: "",
       password: "",
+      role: "student",
     },
   });
 
@@ -213,6 +224,32 @@ export default function RegisterPage() {
                     )}
                   />
 
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700">I am a</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={isLoading}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
+                              <SelectValue placeholder="Select your role" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="student">Student</SelectItem>
+                            <SelectItem value="teacher">Teacher</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-red-500 text-xs" />
+                      </FormItem>
+                    )}
+                  />
+
                   <Button
                     type="submit"
                     className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-lg"
@@ -235,7 +272,7 @@ export default function RegisterPage() {
 
               {/* Features list */}
               <div className="pt-4 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-3 text-center">What you'll get:</p>
+                <p className="text-xs text-gray-500 mb-3 text-center">What you&apos;ll get:</p>
                 <div className="space-y-2">
                   <div className="flex items-center text-sm text-gray-600">
                     <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />

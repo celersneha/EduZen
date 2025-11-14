@@ -4,12 +4,8 @@ export { default } from "next-auth/middleware";
 
 export const config = {
   matcher: [
-    "/add-subject",
-    "/attempt-test",
-    "/dashboard",
-    "/show-subjects",
-    "/subject",
-    "/syllabus",
+    "/student/:path*",
+    "/teacher/:path*",
     "/login",
     "/register",
     "/verify/:path*",
@@ -21,39 +17,51 @@ export async function middleware(request) {
   const url = request.nextUrl;
   const { pathname } = request.nextUrl;
 
-  // Protected student routes - require authentication
-  const protectedStudentRoutes = [
-    "/add-subject",
-    "/attempt-test",
-    "/dashboard",
-    "/show-subjects",
-    "/subject",
-    "/syllabus",
-  ];
+  // Protected student routes - require student role
+  const isStudentRoute = pathname.startsWith("/student");
+  
+  // Protected teacher routes - require teacher role
+  const isTeacherRoute = pathname.startsWith("/teacher");
 
-  // Check if current path is a protected student route
-  const isProtectedRoute = protectedStudentRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  const isProtectedRoute = isStudentRoute || isTeacherRoute;
 
   // Redirect unauthenticated users from protected routes to login
   if (!token && isProtectedRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Redirect authenticated users from auth pages to dashboard
+  // Role-based access control
+  if (token && isProtectedRoute) {
+    const userRole = token.role;
+
+    // Student-only routes
+    if (isStudentRoute && userRole !== "student") {
+      const dashboardRoute = userRole === "teacher" ? "/teacher/dashboard" : "/login";
+      return NextResponse.redirect(new URL(dashboardRoute, request.url));
+    }
+
+    // Teacher-only routes
+    if (isTeacherRoute && userRole !== "teacher") {
+      const dashboardRoute = userRole === "student" ? "/student/dashboard" : "/login";
+      return NextResponse.redirect(new URL(dashboardRoute, request.url));
+    }
+  }
+
+  // Redirect authenticated users from auth pages to appropriate dashboard
   if (
     token &&
     (pathname.startsWith("/login") ||
       pathname.startsWith("/register") ||
       pathname.startsWith("/verify"))
   ) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const dashboardRoute = token.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard";
+    return NextResponse.redirect(new URL(dashboardRoute, request.url));
   }
 
-  // Redirect authenticated users from home page to dashboard
+  // Redirect authenticated users from home page to appropriate dashboard
   if (token && pathname === "/") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const dashboardRoute = token.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard";
+    return NextResponse.redirect(new URL(dashboardRoute, request.url));
   }
 
   return NextResponse.next();

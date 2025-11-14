@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-export default function Verify() {
+function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
@@ -193,7 +193,7 @@ export default function Verify() {
               Check your email
             </h1>
             <p className="text-gray-600">
-              We've sent a verification code to your inbox
+              We&apos;ve sent a verification code to your inbox
             </p>
           </div>
 
@@ -277,7 +277,7 @@ export default function Verify() {
 
               {/* Resend section */}
               <div className="pt-4 border-t border-gray-100 text-center space-y-4">
-                <p className="text-sm text-gray-600">Didn't receive the code?</p>
+                <p className="text-sm text-gray-600">Didn&apos;t receive the code?</p>
                 <Button
                   type="button"
                   variant="outline"
@@ -302,7 +302,7 @@ export default function Verify() {
               {/* Help text */}
               <div className="text-center pt-4 border-t border-gray-100">
                 <p className="text-xs text-gray-500">
-                  Check your spam folder if you don't see the email.{" "}
+                  Check your spam folder if you don&apos;t see the email.{" "}
                   <Link
                     href="/register"
                     className="text-blue-600 hover:underline"
@@ -350,5 +350,18 @@ export default function Verify() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function Verify() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-white"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <VerifyContent />
+    </Suspense>
   );
 }

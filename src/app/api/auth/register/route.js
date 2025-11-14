@@ -1,38 +1,49 @@
-import sendVerificationEmail from "@/utils/sendVerificationEmail";
-import dbConnect from "@/lib/dbConnect";
+import sendVerificationEmail from "@/actions/utils/send-verification-email";
+import dbConnect from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import UserModel from "@/models/user.model";
 import StudentModel from "@/models/student.model";
+import TeacherModel from "@/models/teacher.model";
 
 export async function POST(req) {
   await dbConnect();
 
   try {
-    const { name, email, username, password } = await req.json();
-    
+    const { name, email, username, password, role = "student" } = await req.json();
 
-    const existingUserVerifiedByUsername = await StudentModel.findOne({
+    // Validate role
+    if (!["student", "teacher"].includes(role)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid role. Must be 'student' or 'teacher'.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const existingUserVerifiedByUsername = await UserModel.findOne({
       username,
-      isVerified: true, // Sirf wo users jo pehle se verified hain
+      isVerified: true,
     });
 
-    // Agar username already kisi verified user ke paas hai toh error return kar do
     if (existingUserVerifiedByUsername) {
       return NextResponse.json(
         {
           success: false,
           message: "Username already exists.",
         },
-        {
-          status: 400, // Bad Request
-        }
+        { status: 400 }
       );
     }
 
-    const existingUserByEmail = await StudentModel.findOne({ email });
+    const existingUserByEmail = await UserModel.findOne({ email });
 
     // Random 6-digit verification code
     const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    let user;
 
     if (existingUserByEmail) {
       if (existingUserByEmail.isVerified) {
@@ -47,8 +58,10 @@ export async function POST(req) {
         const hashedPassword = await bcrypt.hash(password, 10);
         existingUserByEmail.password = hashedPassword;
         existingUserByEmail.verifyCode = verifyCode;
-        existingUserByEmail.verifyCodeExpiry = new Date(Date.now() + 3600000); // 1 hour expiry
+        existingUserByEmail.verifyCodeExpiry = new Date(Date.now() + 3600000);
+        existingUserByEmail.role = role;
         await existingUserByEmail.save();
+        user = existingUserByEmail;
       }
     } else {
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -56,7 +69,7 @@ export async function POST(req) {
       const expiryDate = new Date();
       expiryDate.setHours(expiryDate.getHours() + 1);
 
-      const newUser = new StudentModel({
+      user = new UserModel({
         name,
         email,
         username,
@@ -64,10 +77,14 @@ export async function POST(req) {
         verifyCode,
         verifyCodeExpiry: expiryDate,
         isVerified: false,
+        role,
       });
 
-      await newUser.save();
+      await user.save();
     }
+
+    // Create Student or Teacher record after user is verified (will be done in verify route)
+    // For now, we'll create it here but it will be properly linked after verification
 
     // ✅ Send OTP Email
     const emailResponse = await sendVerificationEmail(email, verifyCode);

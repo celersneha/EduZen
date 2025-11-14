@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,8 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, LogOut, BookOpen, BarChart3 } from "lucide-react";
+import { NotificationBell } from "@/components/notification-bell";
 
-export default function Navbar() {
+export function Navbar() {
   const { data: session } = useSession();
 
   const handleSignOut = () => {
@@ -23,9 +25,22 @@ export default function Navbar() {
   return (
     <nav className="container mx-auto p-4 flex items-center justify-between">
       <div className="flex items-center">
-        <Link href={session ? "/dashboard" : "/"}>
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg p-2 cursor-pointer hover:shadow-lg transition-shadow">
-            <span className="text-xl">EduZen</span>
+        <Link
+          href={
+            session
+              ? session.user?.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard"
+              : "/"
+          }
+        >
+          <div className="cursor-pointer hover:opacity-80 transition-opacity">
+            <Image
+              src="/eduzen-logo.png"
+              alt="EduZen Logo"
+              width={120}
+              height={40}
+              className="h-10 w-auto"
+              priority
+            />
           </div>
         </Link>
       </div>
@@ -34,23 +49,33 @@ export default function Navbar() {
         // Logged in user navigation
         <div className="hidden md:flex space-x-6 items-center">
           <Link
-            href="/dashboard"
+            href={session.user?.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard"}
             className="text-gray-600 hover:text-gray-900 transition-colors"
           >
             Dashboard
           </Link>
-          <Link
-            href="/show-subjects"
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            My Subjects
-          </Link>
-          <Link
-            href="/add-subject"
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            Add Subject
-          </Link>
+          {session.user?.role === "teacher" ? (
+            <>
+              <Link
+                href="/teacher/classroom/create"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Create Classroom
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/student/student-classroom/list"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                My Classrooms
+              </Link>
+            </>
+          )}
+
+          {/* Notification Bell */}
+          <NotificationBell />
 
           {/* User dropdown */}
           <DropdownMenu>
@@ -77,21 +102,42 @@ export default function Navbar() {
                   <p className="w-48 truncate text-sm text-muted-foreground">
                     {session.user?.email}
                   </p>
+                  {session.user?.role && (
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {session.user.role}
+                    </p>
+                  )}
                 </div>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/dashboard" className="cursor-pointer">
+                <Link
+                  href={session.user?.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard"}
+                  className="cursor-pointer"
+                >
                   <BarChart3 className="mr-2 h-4 w-4" />
                   Dashboard
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/show-subjects" className="cursor-pointer">
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  My Subjects
-                </Link>
-              </DropdownMenuItem>
+              {session.user?.role === "teacher" ? (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/teacher/classroom/create" className="cursor-pointer">
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      Create Classroom
+                    </Link>
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/student/student-classroom/list" className="cursor-pointer">
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      My Classrooms
+                    </Link>
+                  </DropdownMenuItem>
+                </>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleSignOut}
